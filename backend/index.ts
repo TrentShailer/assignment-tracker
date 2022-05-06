@@ -4,9 +4,15 @@ import fastifyStatic from "@fastify/static";
 import fastifySession from "@fastify/session";
 import fastifyCookie from "@fastify/cookie";
 import fastifyPostgres from "@fastify/postgres";
+import fastifyCors from "@fastify/cors";
 import path from "path";
 const fastify: FastifyInstance = Fastify({
-	logger: true,
+	logger: {
+		prettyPrint: {
+			translateTime: "HH:MM:ss Z",
+			ignore: "pid,hostname",
+		},
+	},
 });
 
 fastify.register(fastifyCookie);
@@ -22,6 +28,19 @@ fastify.register(fastifyPostgres, {
 });
 
 fastify.register(fastifyStatic, { root: path.join(__dirname, "build") });
+
+fastify.register(fastifyCors, {
+	origin: (origin, cb) => {
+		const hostname = new URL(origin).hostname;
+		if (hostname === "localhost") {
+			//  Request from localhost will pass
+			cb(null, true);
+			return;
+		}
+		// Generate an error on other origins, disabling access
+		cb(new Error("Not allowed"), false);
+	},
+});
 
 fastify.register(require("./pageRoute"));
 fastify.register(require("./loginRoute"));

@@ -21,7 +21,9 @@ async function routes(fastify: FastifyInstance, options: any) {
 
 	fastify.get("/home", async (request, reply) => {
 		const user_id = request.session.get<string>("user_id");
+
 		if (!user_id) return reply.redirect(301, "/login");
+
 		if (await UserExists(fastify, user_id)) {
 			return reply.sendFile("index.html");
 		} else {

@@ -28,7 +28,7 @@ export default function Login() {
 			return;
 		}
 		axios
-			.post("/login", { username: username, password: password })
+			.post("http://localhost:2005/login", { username: username, password: password })
 			.then((response) => {
 				let result: any = response.data;
 				if (result.success) {
@@ -37,7 +37,9 @@ export default function Login() {
 					setErrorText("Username or password are incorrect.");
 				}
 			})
-			.catch((response) => {});
+			.catch((response) => {
+				console.log(response);
+			});
 	};
 
 	return (

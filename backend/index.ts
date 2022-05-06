@@ -6,13 +6,38 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyPostgres from "@fastify/postgres";
 import fastifyCors from "@fastify/cors";
 import path from "path";
+
+// @ts-ignore
 const fastify: FastifyInstance = Fastify({
 	logger: {
 		prettyPrint: {
-			translateTime: "HH:MM:ss Z",
+			translateTime: "dd/mm/yyyy HH:MM:ss",
 			ignore: "pid,hostname",
 		},
+		// @ts-ignore
+		redact: ["body.password"],
+		serializers: {
+			res(reply) {
+				return {
+					statusCode: reply.statusCode,
+				};
+			},
+			req(request) {
+				return {
+					method: request.method,
+					url: request.url,
+					session: request.session,
+				};
+			},
+		},
 	},
+});
+
+fastify.addHook("preHandler", function (req, reply, done) {
+	if (req.body) {
+		req.log.info({ body: req.body }, "parsed body");
+	}
+	done();
 });
 
 fastify.register(fastifyCookie);

@@ -57,8 +57,8 @@ function LoginForm(props: IProps) {
 		setPassword(e.target.value);
 	};
 
-	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
+	const onSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
+		if (e) e.preventDefault();
 
 		setErrorText("");
 

@@ -94,7 +94,7 @@ function RegisterForm(props: IProps) {
 	};
 
 	const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
+		if (e) e.preventDefault();
 		setErrorText("");
 
 		let validUsername = IsUsernameValid(username);

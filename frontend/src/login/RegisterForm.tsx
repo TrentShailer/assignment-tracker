@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import axios from "axios";
 import IconButton from "../components/IconButton";
 import { IconType } from "../assets/Types/Icon";
@@ -186,9 +185,5 @@ function RegisterForm(props: IProps) {
 		</div>
 	);
 }
-
-RegisterForm.propTypes = {
-	changeForm: PropTypes.func.isRequired,
-};
 
 export default RegisterForm;

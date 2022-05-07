@@ -1,5 +1,4 @@
 import React, { SVGProps, useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import { IconType } from "../assets/Types/Icon";
 import { ReactComponent as Close } from "../assets/icons/close.svg";
 import { ReactComponent as HamburgerMenu } from "../assets/icons/hamburgerMenu.svg";
@@ -9,9 +8,8 @@ import { ReactComponent as Logout } from "../assets/icons/logout.svg";
 import { ReactComponent as NewAccount } from "../assets/icons/newAccount.svg";
 import { ReactComponent as RemoveAccount } from "../assets/icons/removeAccount.svg";
 import { ReactComponent as Tick } from "../assets/icons/tick.svg";
-import { isPropertyAssignment } from "typescript";
 
-function Icon(props: Props) {
+function Icon(props: IProps) {
 	let test = <Close />;
 	const [icon, setIcon] = useState<typeof test>();
 
@@ -50,16 +48,9 @@ function Icon(props: Props) {
 	return <div>{icon}</div>;
 }
 
-interface Props {
+interface IProps {
 	icon: IconType;
 	size: number;
 	color: string;
 }
-
-Icon.propTypes = {
-	icon: PropTypes.oneOf(Object.values(IconType) as IconType[]).isRequired,
-	size: PropTypes.number.isRequired,
-	color: PropTypes.string.isRequired,
-};
-
 export default Icon;

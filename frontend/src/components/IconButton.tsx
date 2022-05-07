@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
 import { IconType } from "../assets/Types/Icon";
 import Icon from "./Icon";
 
@@ -21,7 +20,7 @@ var LightenColor = function (color: string, percent: number) {
 		.slice(1);
 };
 
-function IconButton(props: Props) {
+function IconButton(props: IProps) {
 	const [shadow, setShadow] = useState<string>("0px 0px 10px rgba(0, 0, 0, 0.5)");
 	const [color, setColor] = useState<string>(props.color);
 
@@ -67,18 +66,11 @@ function IconButton(props: Props) {
 	);
 }
 
-interface Props {
+interface IProps {
 	icon: IconType;
 	size: number;
 	color: string;
 	onClick: Function;
 }
-
-IconButton.propTypes = {
-	icon: PropTypes.oneOf(Object.values(IconType) as IconType[]),
-	size: PropTypes.number.isRequired,
-	color: PropTypes.string.isRequired,
-	onClick: PropTypes.func.isRequired,
-};
 
 export default IconButton;

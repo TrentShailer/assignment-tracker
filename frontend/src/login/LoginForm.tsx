@@ -2,7 +2,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { IconType } from "../assets/Types/Icon";
 import IconButton from "../components/IconButton";
-import PropTypes from "prop-types";
 
 interface IProps {
 	changeForm: Function;
@@ -150,7 +149,5 @@ function LoginForm(props: IProps) {
 		</div>
 	);
 }
-
-LoginForm.propTypes = { changeForm: PropTypes.func.isRequired };
 
 export default LoginForm;

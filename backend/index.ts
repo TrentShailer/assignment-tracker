@@ -7,6 +7,10 @@ import fastifyPostgres from "@fastify/postgres";
 import fastifyCors from "@fastify/cors";
 import path from "path";
 
+import pageRoute from "./pageRoute";
+import loginRoute from "./loginRoute";
+import homeRoute from "./homeRoute";
+
 // @ts-ignore
 const fastify: FastifyInstance = Fastify({
 	logger: {
@@ -26,7 +30,6 @@ const fastify: FastifyInstance = Fastify({
 				return {
 					method: request.method,
 					url: request.url,
-					session: request.session,
 				};
 			},
 		},
@@ -46,6 +49,7 @@ if (process.env.COOKIE_SECRET)
 	fastify.register(fastifySession, {
 		cookieName: "sessionId",
 		secret: process.env.COOKIE_SECRET,
+		cookie: { secure: false },
 	});
 
 fastify.register(fastifyPostgres, {
@@ -54,7 +58,7 @@ fastify.register(fastifyPostgres, {
 
 fastify.register(fastifyStatic, { root: path.join(__dirname, "build") });
 
-fastify.register(fastifyCors, {
+/* fastify.register(fastifyCors, {
 	origin: (origin, cb) => {
 		const hostname = new URL(origin).hostname;
 		if (hostname === "localhost") {
@@ -65,11 +69,15 @@ fastify.register(fastifyCors, {
 		// Generate an error on other origins, disabling access
 		cb(new Error("Not allowed"), false);
 	},
+}); */
+
+fastify.setNotFoundHandler(async (request, reply) => {
+	reply.status(404).send("404 not found");
 });
 
-fastify.register(require("./pageRoute"));
-fastify.register(require("./loginRoute"));
-fastify.register(require("./homeRoute"));
+fastify.register(pageRoute);
+fastify.register(loginRoute);
+fastify.register(homeRoute);
 
 const start = async () => {
 	try {

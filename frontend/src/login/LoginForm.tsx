@@ -114,7 +114,13 @@ function LoginForm(props: IProps) {
 				}}>
 				<div style={{ color: "#fff", fontSize: 36 }}>Login</div>
 				<form onSubmit={onSubmit}>
-					<div style={{ display: "flex", flexDirection: "column" }}>
+					<div
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							height: 128,
+							justifyContent: "space-evenly",
+						}}>
 						<input placeholder="Username" onChange={handleUsernameChange} />
 						<input
 							type="password"
@@ -130,7 +136,6 @@ function LoginForm(props: IProps) {
 						width: "100%",
 						display: "flex",
 						justifyContent: "space-between",
-						marginTop: 20,
 					}}>
 					<IconButton
 						icon={IconType.newAccount}

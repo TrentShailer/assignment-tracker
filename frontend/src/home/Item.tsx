@@ -20,6 +20,7 @@ function Item(props: IProps) {
 	return (
 		<div
 			style={{
+				userSelect: "none",
 				height: "max-content",
 				background: "#F5F5F5",
 				borderRadius: 5,
@@ -45,7 +46,7 @@ function Item(props: IProps) {
 						}
 					}}
 					step={5}
-					marks={{ 0: " ", 60: " ", 85: " " }}
+					marks={{ 0: " ", 33: " ", 66: " ", 100: " " }}
 				/>
 			</div>
 		</div>

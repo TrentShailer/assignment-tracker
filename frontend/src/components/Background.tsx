@@ -6,8 +6,8 @@ export default function Background() {
 			style={{
 				position: "fixed",
 				background: "url('background.svg')",
-				width: "100vw",
-				height: "100vh",
+				width: "max(1920px, 100vw)",
+				height: "max(1080px, 100vh)",
 				backgroundSize: "cover",
 				zIndex: -100,
 			}}

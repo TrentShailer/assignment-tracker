@@ -1,4 +1,5 @@
 import React from "react";
+import AddContainer from "./AddContainer";
 import Container from "./Container";
 
 export default function Homepage() {
@@ -15,9 +16,10 @@ export default function Homepage() {
 					display: "flex",
 					flexDirection: "row",
 				}}>
-				<Container title="Active" />
+				<Container notEditable={true} title="Active" />
 				<Container title="ENGR101" />
 				<Container title="CYBR171" />
+				<AddContainer />
 			</div>
 		</div>
 	);

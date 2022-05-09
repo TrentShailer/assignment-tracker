@@ -46,7 +46,7 @@ export default function AccountMenu() {
 	}, [isOpen]);
 
 	return (
-		<div style={{ position: "relative" }}>
+		<div style={{ position: "relative", userSelect: "none" }}>
 			<IconButton
 				onClick={() => {
 					setIsOpen(!isOpen);
@@ -56,15 +56,7 @@ export default function AccountMenu() {
 				color={"#4DB6AC"}
 			/>
 			{isOpen ? (
-				<div
-					className="glassCard"
-					style={{
-						position: "absolute",
-						width: "max-content",
-						height: "max-content",
-						right: 0,
-						top: 75,
-					}}>
+				<div className="menu" style={{ position: "absolute", right: 0, top: 75 }}>
 					{menu}
 				</div>
 			) : null}

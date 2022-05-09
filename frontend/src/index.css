@@ -11,27 +11,111 @@ code {
 	font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-.glassCard {
-	background-color: rgba(255, 255, 255, 0.1);
-	backdrop-filter: blur(10px);
+.menu {
+	background-color: #263238;
 	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-	border-radius: 15px;
+	border-radius: 10px;
 	padding: 20px;
-}
-
-.glass {
-	background-color: rgba(255, 255, 255, 0.1);
-	backdrop-filter: blur(10px);
-	box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.25);
 }
 
 input {
 	outline: none;
 	border: none;
-	margin-top: 10px;
 	height: 36px;
 	font-size: 20px;
 	padding-left: 16px;
 	padding-right: 16px;
 	border-radius: 50px;
+}
+
+textarea {
+	font-family: Roboto;
+	outline: none;
+	border: none;
+	height: 26px;
+	font-size: 16px;
+	background-color: #e0e0e0;
+	border-radius: 5px;
+	padding: 10px;
+}
+
+.containerInput {
+	font-family: Roboto;
+	outline: none;
+	border: none;
+	height: 26px;
+	font-size: 20px;
+	font-weight: 500;
+	background-color: #e0e0e0;
+	border-radius: 5px;
+	padding-left: 10px;
+	padding-right: 5px;
+}
+
+/* Firefox */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: #616161 #00000033;
+}
+
+/* Chrome, Edge and Safari */
+*::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+*::-webkit-scrollbar-track {
+	border-radius: 5px;
+	background-color: #00000033;
+}
+
+*::-webkit-scrollbar-track:hover {
+	background-color: #00000033;
+}
+
+*::-webkit-scrollbar-track:active {
+	background-color: #00000033;
+}
+
+*::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background-color: #616161;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background-color: #616161;
+}
+
+*::-webkit-scrollbar-thumb:active {
+	background-color: #757575;
+}
+
+@supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+	.glassCard {
+		background-color: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+		border-radius: 15px;
+		padding: 20px;
+	}
+	.glass {
+		background-color: rgba(255, 255, 255, 0.1);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.25);
+	}
+}
+
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+	.glassCard {
+		background-color: rgba(255, 255, 255, 0.25);
+		box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+		border-radius: 15px;
+		padding: 20px;
+	}
+
+	.glass {
+		background-color: rgba(255, 255, 255, 0.25);
+		box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.25);
+	}
 }

@@ -148,8 +148,14 @@ function RegisterForm(props: IProps) {
 					transition: "opacity 350ms ease-in-out",
 				}}>
 				<div style={{ color: "#fff", fontSize: 36 }}>Register</div>
-				<form onSubmit={onSubmit}>
-					<div style={{ display: "flex", flexDirection: "column" }}>
+				<form style={{ width: "100%" }} onSubmit={onSubmit}>
+					<div
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							height: 128,
+							justifyContent: "space-evenly",
+						}}>
 						<input placeholder="Username" onChange={handleUsernameChange} />
 						<input
 							type="password"
@@ -165,7 +171,6 @@ function RegisterForm(props: IProps) {
 						width: "100%",
 						display: "flex",
 						justifyContent: "flex-end",
-						marginTop: 20,
 						gap: 10,
 					}}>
 					<IconButton

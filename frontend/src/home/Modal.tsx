@@ -6,6 +6,9 @@ import subDays from "date-fns/subDays";
 import isPast from "date-fns/isPast";
 import addDays from "date-fns/addDays";
 import format from "date-fns/format";
+import { DateTimePicker } from "@material-ui/pickers/DateTimePicker";
+import DateFnsUtils from "@date-io/date-fns";
+import MuiPickersUtilsProvider from "@material-ui/pickers/MuiPickersUtilsProvider";
 
 let timeout = setTimeout(() => {}, 100);
 
@@ -17,6 +20,9 @@ export default function Modal() {
 	const [progressColor, setProgressColor] = useState("#fdd835");
 	const [outDate, setOutDate] = useState<Date>(addDays(new Date(), 2));
 	const [dueDate, setDueDate] = useState<Date>(addDays(new Date(), 8));
+
+	const [showDueSelector, setShowDueSelector] = useState(true);
+	const [showOutSelector, setShowOutSelector] = useState(false);
 
 	const [outText, setOutText] = useState("");
 	const [dueText, setDueText] = useState("");
@@ -218,8 +224,26 @@ export default function Modal() {
 									flexDirection: "row",
 									justifyContent: "space-between",
 								}}>
-								<Button>Edit out date</Button>
-								<Button>Edit due date</Button>
+								<MuiPickersUtilsProvider utils={DateFnsUtils}>
+									<div>
+										<div>Out Date</div>
+										<DateTimePicker
+											value={outDate}
+											onChange={(date) => {
+												if (date) setOutDate(date);
+											}}
+										/>
+									</div>
+									<div>
+										<div>Due Date</div>
+										<DateTimePicker
+											value={dueDate}
+											onChange={(date) => {
+												if (date) setDueDate(date);
+											}}
+										/>
+									</div>
+								</MuiPickersUtilsProvider>
 							</div>
 							<div
 								style={{

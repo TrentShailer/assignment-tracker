@@ -1,7 +1,7 @@
 import React from "react";
 import Homepage from "./Homepage";
 import Menubar from "./Menubar";
-import Modal from "./Modal";
+import Modal from "./modal/Modal";
 
 export default function Home() {
 	return (

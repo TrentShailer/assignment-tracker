@@ -74,8 +74,28 @@ export default function Container(props: IProps) {
 					marginBottom: 20,
 					gap: 20,
 				}}>
-				<Item />
-				<Item />
+				<Item
+					assignment={{
+						id: "",
+						course: "ENGR121",
+						title: "Assignment 1",
+						notes: "",
+						progress: 33,
+						outDate: new Date(),
+						dueDate: new Date(),
+					}}
+				/>
+				<Item
+					assignment={{
+						id: "",
+						course: "ENGR121",
+						title: "Assignment 2",
+						notes: "",
+						progress: 10,
+						outDate: new Date(),
+						dueDate: new Date(),
+					}}
+				/>
 			</div>
 		</div>
 	);

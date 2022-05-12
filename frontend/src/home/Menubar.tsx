@@ -26,6 +26,7 @@ export default function Menubar() {
 				height: 64,
 				display: "flex",
 				alignItems: "center",
+				zIndex: 100,
 			}}>
 			<div
 				style={{

@@ -58,10 +58,10 @@ export default function Dates(props: IProps) {
 		<div>
 			<div
 				style={{
-					width: "calc(100% - 20px)",
+					width: "calc(100%)",
 					marginTop: 20,
-					marginLeft: 10,
-					marginRight: 10,
+					marginLeft: 0,
+					marginRight: 0,
 					display: "flex",
 					flexDirection: "row",
 					justifyContent: "space-between",
@@ -86,6 +86,7 @@ export default function Dates(props: IProps) {
 							renderInput={(props) => <TextField {...props} />}
 							label="Out Date"
 							value={outDate}
+							inputFormat="yyyy/MM/dd hh:mm a"
 							onAccept={SaveChange}
 							onChange={(date) => {
 								setOutDate(date);
@@ -97,6 +98,7 @@ export default function Dates(props: IProps) {
 							renderInput={(props) => <TextField {...props} />}
 							label="Due Date"
 							value={dueDate}
+							inputFormat="yyyy/MM/dd hh:mm a"
 							onAccept={SaveChange}
 							onChange={(date) => {
 								setDueDate(date);

@@ -4,12 +4,13 @@ import IconButton from "../components/IconButton";
 
 interface IProps {
 	onDelete: Function;
+	username: string;
 }
 
 function LogoutMenu(props: IProps) {
 	return (
 		<div style={{ width: 200 }}>
-			<div style={{ color: "#fff", fontSize: 20, marginBottom: 10 }}>trentshailer</div>
+			<div style={{ color: "#fff", fontSize: 20, marginBottom: 10 }}>{props.username}</div>
 			<div
 				style={{
 					display: "flex",

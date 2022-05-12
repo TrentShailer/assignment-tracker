@@ -1,16 +1,25 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { EventEmitter, EventType } from "../components/EventEmitter";
 
-export default function AddContainer() {
+interface IProps {
+	course_id: string;
+}
+
+export default function AddItem(props: IProps) {
 	const [showInput, setShowInput] = useState(false);
 	const [title, setTitle] = useState("");
 
 	const Create = () => {
 		if (title) {
-			axios.post("/course/new", { course_name: title }).then((response) => {
-				EventEmitter.emit(EventType.UpdatedAssignments);
-			});
+			axios
+				.post("/assignment/new", {
+					course_id: props.course_id,
+					assignment_name: title,
+				})
+				.then((response) => {
+					EventEmitter.emit(EventType.UpdatedAssignments);
+				});
 			setTitle("");
 		}
 	};
@@ -21,21 +30,19 @@ export default function AddContainer() {
 				setShowInput(true);
 			}}
 			style={{
-				width: 340,
+				userSelect: "none",
 				height: "max-content",
-				cursor: "pointer",
-				flexShrink: 0,
-				margin: 20,
-				background: "#E0E0E0",
+				background: "#F5F5F5",
 				borderRadius: 5,
-				padding: 15,
-				boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.25)",
+				boxShadow: "0px 5px 5px rgba(0, 0, 0, 0.1)",
+				padding: "20px 15px 20px 15px",
+				cursor: "pointer",
 			}}>
 			{showInput ? (
 				<div>
 					<input
 						className="containerInput"
-						style={{ width: 308, height: 42, paddingLeft: 16, paddingRight: 16 }}
+						style={{ width: 248, height: 42, paddingLeft: 16, paddingRight: 16 }}
 						autoFocus
 						onBlur={() => {
 							setShowInput(false);
@@ -50,7 +57,7 @@ export default function AddContainer() {
 								Create();
 							}
 						}}
-						placeholder="Course Name"
+						placeholder="Assignment Name"
 					/>
 				</div>
 			) : (
@@ -70,7 +77,7 @@ export default function AddContainer() {
 							fontSize: 20,
 							fontWeight: 500,
 						}}>
-						Add Course
+						Add Assignment
 					</div>
 				</div>
 			)}

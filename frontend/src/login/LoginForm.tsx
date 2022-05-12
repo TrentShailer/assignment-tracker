@@ -75,7 +75,7 @@ function LoginForm(props: IProps) {
 		}
 
 		axios
-			.post("http://localhost:2005/login", { username: username, password: password })
+			.post("/login", { username: username, password: password })
 			.then((response) => {
 				let result: any = response.data;
 				if (result.success) {

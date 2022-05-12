@@ -1,7 +1,8 @@
+import axios from "axios";
 import Slider from "rc-slider";
 import React, { useEffect, useState } from "react";
 import { EventEmitter, EventType } from "../../components/EventEmitter";
-import Assignment from "../../types/Assignment";
+import { Assignment } from "../../types/types";
 
 import Dates from "./Dates";
 import Notes from "./Notes";
@@ -11,29 +12,47 @@ import Title from "./Title";
 interface IAssignmentChanges {
 	dueDate?: Date;
 	outDate?: Date;
-	title?: string;
+	assignment_name?: string;
 	notes?: string;
 	progress?: number;
 }
 
 export default function Modal() {
-	const [assignment, setAssignment] = useState<Assignment>(Assignment.EmptyAssignment);
+	const [assignment, setAssignment] = useState<Assignment | null>(null);
+	const [canSave, setCanSave] = useState(false);
 
 	const SaveChange = (newValues: IAssignmentChanges) => {
-		setAssignment((assign) => {
-			if (assign === Assignment.EmptyAssignment) return assign;
-			if (newValues.dueDate) assign.dueDate = newValues.dueDate;
-			if (newValues.outDate) assign.outDate = newValues.outDate;
-			if (newValues.title) assign.title = newValues.title;
-			if (newValues.notes) assign.notes = newValues.notes;
-			if (newValues.progress) assign.progress = newValues.progress;
-			console.log(newValues);
-			return assign;
-		});
+		if (canSave)
+			setAssignment((assign) => {
+				if (!assign) return assign;
+				if (newValues.dueDate !== undefined) assign.dueDate = newValues.dueDate;
+				if (newValues.outDate !== undefined) assign.outDate = newValues.outDate;
+				if (newValues.assignment_name !== undefined)
+					assign.assignment_name = newValues.assignment_name;
+				if (newValues.notes !== undefined) assign.notes = newValues.notes;
+				if (newValues.progress !== undefined) assign.progress = newValues.progress;
+				axios
+					.post("/assignment/update", {
+						assignment_id: assign.assignment_id,
+						assignment_name: assign.assignment_name,
+						notes: assign.notes,
+						progress: assign.progress,
+						outDate: assign.outDate,
+						dueDate: assign.dueDate,
+					})
+					.then((response) => {
+						EventEmitter.emit(EventType.UpdatedAssignments);
+					});
+
+				return assign;
+			});
 	};
 
 	const OpenModal = (assignment: any) => {
-		console.log(assignment.assignment);
+		setCanSave(false);
+		setTimeout(() => {
+			setCanSave(true);
+		}, 500);
 		setAssignment(assignment.assignment);
 	};
 
@@ -47,12 +66,25 @@ export default function Modal() {
 	}, []);
 
 	const handleClose = () => {
-		setAssignment(Assignment.EmptyAssignment);
+		setAssignment(null);
+	};
+
+	const handleDelete = () => {
+		if (assignment) {
+			axios
+				.post("/assignment/delete", {
+					assignment_id: assignment.assignment_id,
+				})
+				.then((response) => {
+					EventEmitter.emit(EventType.UpdatedAssignments);
+				});
+			handleClose();
+		}
 	};
 
 	return (
 		<div>
-			{assignment !== Assignment.EmptyAssignment ? (
+			{assignment ? (
 				<div
 					style={{
 						position: "absolute",
@@ -105,7 +137,22 @@ export default function Modal() {
 									/>
 								</svg>
 							</div>
-							<Title title={assignment.title} SaveChanges={SaveChange} />
+							<div
+								onClick={handleDelete}
+								style={{
+									position: "absolute",
+									right: 36,
+									top: 0,
+									cursor: "pointer",
+								}}>
+								<svg width="24" height="24" viewBox="0 0 24 24">
+									<path
+										fill="#ef5350"
+										d="M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8,9H16V19H8V9M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z"
+									/>
+								</svg>
+							</div>
+							<Title title={assignment.assignment_name} SaveChanges={SaveChange} />
 
 							<Notes notes={assignment.notes} SaveChanges={SaveChange} />
 							<Dates

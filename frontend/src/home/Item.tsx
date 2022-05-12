@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
-import Assignment from "../types/Assignment";
+import { Assignment } from "../types/types";
 import isPast from "date-fns/isPast";
 import formatDistance from "date-fns/formatDistance";
 import format from "date-fns/format";
@@ -9,10 +9,10 @@ import { EventEmitter, EventType } from "../components/EventEmitter";
 
 interface IProps {
 	assignment: Assignment;
+	course_name?: string;
 }
 
 function Item(props: IProps) {
-	const [progress, setProgress] = useState(0);
 	const [progressColor, setProgressColor] = useState("#fdd835");
 	const [dateText, setDateText] = useState("");
 
@@ -34,14 +34,14 @@ function Item(props: IProps) {
 	}, [props.assignment]);
 
 	useEffect(() => {
-		if (progress < 60) {
+		if (props.assignment.progress < 35) {
 			setProgressColor("#fdd835");
-		} else if (progress < 85) {
+		} else if (props.assignment.progress < 65) {
 			setProgressColor("#aed581");
 		} else {
 			setProgressColor("#8bc34a");
 		}
-	}, [progress]);
+	}, [props.assignment.progress]);
 
 	return (
 		<div
@@ -57,8 +57,14 @@ function Item(props: IProps) {
 				padding: "20px 15px 20px 15px",
 				cursor: "pointer",
 			}}>
-			<div style={{ fontSize: 18 }}>{props.assignment.title}</div>
-			<div style={{ fontSize: 18, marginTop: 5 }}>{dateText}</div>
+			<div style={{ display: "flex", justifyContent: "space-between" }}>
+				<div style={{ fontSize: 18 }}>{props.assignment.assignment_name}</div>
+
+				<div style={{ fontSize: 16, color: "#bdbdbd", fontWeight: 500 }}>
+					{props.course_name}
+				</div>
+			</div>
+			<div style={{ fontSize: 16, marginTop: 5 }}>{dateText}</div>
 			<div
 				style={{
 					paddingLeft: 5,
@@ -69,14 +75,14 @@ function Item(props: IProps) {
 					disabled
 					trackStyle={{ backgroundColor: progressColor }}
 					handleStyle={{ opacity: "0", cursor: "pointer" }}
-					defaultValue={props.assignment.progress}
-					onChange={(v) => {
-						if (typeof v === "number") {
-							setProgress(v);
-						}
-					}}
+					value={props.assignment.progress}
 					step={5}
-					marks={{ 0: " ", 33: " ", 66: " ", 100: " " }}
+					marks={{
+						0: " ",
+						35: " ",
+						65: " ",
+						100: " ",
+					}}
 				/>
 			</div>
 		</div>

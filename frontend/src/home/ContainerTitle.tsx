@@ -7,15 +7,15 @@ interface IProps {
 
 let timeout = setTimeout(() => {}, 100);
 
-export default function Title(props: IProps) {
+export default function ContainerTitle(props: IProps) {
 	const [isEditingTitle, setIsEditingTitle] = useState(false);
 	const [title, setTitle] = useState(props.title);
 
 	const SaveChange = () => {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => {
-			props.SaveChanges({ assignment_name: title });
-		}, 250);
+			props.SaveChanges(title);
+		}, 1000);
 	};
 
 	return (
@@ -31,10 +31,10 @@ export default function Title(props: IProps) {
 			{isEditingTitle ? (
 				<div
 					style={{
-						paddingTop: 0,
-						paddingLeft: 0,
-						paddingRight: 0,
-						paddingBottom: 0,
+						paddingTop: 19,
+						paddingLeft: 20,
+						paddingRight: 20,
+						paddingBottom: 3,
 					}}>
 					<input
 						className="containerInput"
@@ -61,9 +61,7 @@ export default function Title(props: IProps) {
 			) : (
 				<div
 					style={{
-						paddingLeft: 10,
-						paddingTop: 2,
-						paddingBottom: 2,
+						padding: "21px 20px 5px 30px",
 					}}>
 					{title}
 				</div>

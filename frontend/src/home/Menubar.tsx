@@ -3,12 +3,19 @@ import { IconType } from "../assets/Types/Icon";
 import IconButton from "../components/IconButton";
 import AccountMenu from "./AccountMenu";
 
+let interval = setInterval(() => {}, 1000 * 60);
+
 export default function Menubar() {
 	const [date, setDate] = useState<string>("");
 
 	useEffect(() => {
+		clearInterval(interval);
 		let now = new Date();
 		setDate(now.toDateString());
+		interval = setInterval(() => {
+			let now = new Date();
+			setDate(now.toDateString());
+		}, 1000 * 60);
 	}, []);
 
 	return (

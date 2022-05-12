@@ -110,7 +110,7 @@ function RegisterForm(props: IProps) {
 		}
 
 		axios
-			.post("http://localhost:2005/register", { username: username, password: password })
+			.post("/register", { username: username, password: password })
 			.then((response) => {
 				let result: any = response.data;
 				if (result.success) {

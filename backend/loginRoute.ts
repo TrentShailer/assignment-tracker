@@ -17,7 +17,6 @@ async function loginRoutes(fastify: FastifyInstance, options: any) {
 		);
 
 		client.release();
-
 		if (userQuery.rowCount === 0) {
 			return reply.send({ success: false });
 		}

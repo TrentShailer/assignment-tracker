@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { IconType } from "../assets/Types/Icon";
 import IconButton from "../components/IconButton";
@@ -6,10 +7,12 @@ import LogoutMenu from "./LogoutMenu";
 
 export default function AccountMenu() {
 	const [icon, setIcon] = useState(IconType.hamburgerMenu);
+	const [username, setUsername] = useState("");
 	const [isOpen, setIsOpen] = useState(false);
 	const [isConfirm, setIsConfirm] = useState(false);
 	const [menu, setMenu] = useState<JSX.Element>(
 		<LogoutMenu
+			username={username}
 			onDelete={() => {
 				setIsConfirm(true);
 			}}
@@ -28,13 +31,14 @@ export default function AccountMenu() {
 		} else {
 			setMenu(
 				<LogoutMenu
+					username={username}
 					onDelete={() => {
 						setIsConfirm(true);
 					}}
 				/>
 			);
 		}
-	}, [isConfirm]);
+	}, [username, isConfirm]);
 
 	useEffect(() => {
 		if (isOpen) {
@@ -44,6 +48,12 @@ export default function AccountMenu() {
 			setIcon(IconType.hamburgerMenu);
 		}
 	}, [isOpen]);
+
+	useEffect(() => {
+		axios.get("/username").then((result) => {
+			setUsername(result.data.username);
+		});
+	}, []);
 
 	return (
 		<div style={{ position: "relative", userSelect: "none" }}>

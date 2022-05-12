@@ -14,7 +14,7 @@ export default function Notes(props: IProps) {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => {
 			props.SaveChanges({ notes: notes });
-		}, 1000);
+		}, 250);
 	}, [notes]);
 
 	return (

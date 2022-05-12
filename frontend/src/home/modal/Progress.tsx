@@ -24,7 +24,7 @@ export default function Progress(props: IProps) {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => {
 			props.SaveChanges({ progress: progress });
-		}, 1000);
+		}, 250);
 	}, [progress]);
 
 	return (

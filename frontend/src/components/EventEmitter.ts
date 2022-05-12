@@ -16,7 +16,7 @@ class EventEmitter {
 		});
 	}
 
-	static emit(event: EventType, data: any) {
+	static emit(event: EventType, data?: any) {
 		if (!this.events[event]) return;
 		this.events[event].listeners.forEach((e: Listener) => {
 			e.callback(data);
@@ -26,6 +26,7 @@ class EventEmitter {
 
 enum EventType {
 	OpenModal,
+	UpdatedAssignments,
 }
 
 interface Listener {

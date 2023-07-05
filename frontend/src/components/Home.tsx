@@ -127,7 +127,7 @@ export default function Home({ user, SetUser }: Props) {
   const assignmentRef = useRef(assignments);
 
   const UpdateAssignments = () => {
-    setAssignments(assignmentRef.current.sort(compareAssignments));
+    setAssignments([...assignmentRef.current.sort(compareAssignments)]);
   };
 
   const Focus = () => {

@@ -22,14 +22,14 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([]);
 
   const GetActiveAssignments = () => {
-    setActiveAssignments(
-      assignments.filter(
+    setActiveAssignments([
+      ...assignments.filter(
         (assignment) =>
           assignment.out_date.isBefore(dayjs()) &&
           assignment.progress < 100 &&
           assignment.due_date.isAfter(dayjs())
-      )
-    );
+      ),
+    ]);
   };
 
   useEffect(() => {

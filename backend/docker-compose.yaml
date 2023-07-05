@@ -1,6 +1,6 @@
 services:
   server:
-    image: trentshailer/test:latest
+    image: trentshailer/assignment-tracker:latest
     env_file:
       - ./.env
     ports:

@@ -28,7 +28,7 @@ export default function Delete({ course, isOpen, onClose, FetchData }: Props) {
   const tryDelete = async () => {
     setLoading(true);
     try {
-      await axios.delete(`/api/v1/course/${course.id}`);
+      await axios.delete(`/api/v1/courses/${course.id}`);
       toast({ title: "Delete Successful", status: "success" });
       FetchData();
     } catch (error) {

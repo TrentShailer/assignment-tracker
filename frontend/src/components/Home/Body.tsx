@@ -14,10 +14,49 @@ interface Props {
   courses: Course[];
 }
 
+let interval: number;
+
 export default function Body({ FetchData, assignments, courses }: Props) {
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const [openAssignment, setOpenAssignment] = useState<Assignment>(null);
   const [openCourse, setOpenCourse] = useState<Course>(null);
+
+  const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([]);
+
+  const GetActiveAssignments = () => {
+    setActiveAssignments(
+      assignments.filter(
+        (assignment) =>
+          assignment.out_date.isBefore(dayjs()) &&
+          assignment.progress < 100 &&
+          assignment.due_date.isAfter(dayjs())
+      )
+    );
+  };
+
+  const FocusIn = () => {
+    GetActiveAssignments();
+
+    interval = setInterval(GetActiveAssignments, 1000 * 60 * 10);
+  };
+  const FocusOut = () => {
+    clearInterval(interval);
+  };
+
+  useEffect(() => {
+    GetActiveAssignments();
+    document.addEventListener("focusin", FocusIn);
+    document.addEventListener("focusout", FocusOut);
+
+    return () => {
+      document.removeEventListener("focusin", FocusIn);
+      document.removeEventListener("focusout", FocusOut);
+    };
+  }, []);
+
+  useEffect(() => {
+    GetActiveAssignments();
+  }, [assignments]);
 
   const OpenAssignment = (assignment: Assignment | null, course: Course) => {
     setOpenAssignment(assignment);
@@ -46,9 +85,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
           OpenAssignment={OpenAssignment}
           FetchData={FetchData}
           course={{ id: "", name: "Active" }}
-          assignments={assignments.filter((assignment) =>
-            assignment.out_date.isBefore(dayjs())
-          )}
+          assignments={activeAssignments}
           courses={courses}
         />
         {courses.map((course) => (

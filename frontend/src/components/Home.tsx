@@ -142,6 +142,10 @@ export default function Home({ user, SetUser }: Props) {
   };
 
   useEffect(() => {
+    console.log(assignments);
+  }, [assignments]);
+
+  useEffect(() => {
     FetchData();
   }, []);
 

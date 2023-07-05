@@ -131,6 +131,7 @@ export default function Home({ user, SetUser }: Props) {
   };
 
   const Focus = () => {
+    console.log(focus);
     UpdateAssignments();
 
     interval = setInterval(UpdateAssignments, 1000 * 60 * 10);
@@ -138,17 +139,6 @@ export default function Home({ user, SetUser }: Props) {
   const Blur = () => {
     clearInterval(interval);
   };
-
-  useEffect(() => {
-    UpdateAssignments();
-    document.addEventListener("focus", Focus);
-    document.addEventListener("blur", Blur);
-
-    return () => {
-      document.removeEventListener("focus", Focus);
-      document.removeEventListener("blur", Blur);
-    };
-  }, []);
 
   useEffect(() => {
     assignmentRef.current = assignments;
@@ -176,6 +166,14 @@ export default function Home({ user, SetUser }: Props) {
 
   useEffect(() => {
     FetchData();
+    UpdateAssignments();
+    document.addEventListener("focus", Focus);
+    document.addEventListener("blur", Blur);
+
+    return () => {
+      document.removeEventListener("focus", Focus);
+      document.removeEventListener("blur", Blur);
+    };
   }, []);
 
   return (

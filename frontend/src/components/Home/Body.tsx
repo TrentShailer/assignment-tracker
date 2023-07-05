@@ -58,9 +58,9 @@ export default function Body({ FetchData, assignments, courses }: Props) {
     GetActiveAssignments();
   }, [assignments]);
 
-  useEffect(() => {
+  /*   useEffect(() => {
     console.log(activeAssignments);
-  }, [activeAssignments]);
+  }, [activeAssignments]); */
 
   const OpenAssignment = (assignment: Assignment | null, course: Course) => {
     setOpenAssignment(assignment);

@@ -6,7 +6,7 @@ import Header from "./Home/Header";
 import Body from "./Home/Body";
 import dayjs, { Dayjs } from "dayjs";
 import axios from "axios";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 interface Props {
   SetUser: (user: User | null) => void;
@@ -115,12 +115,45 @@ const compareAssignments = (a: Assignment, b: Assignment): number => {
   return compareByOutDate(a, b);
 };
 
+let interval: number;
+
 export default function Home({ user, SetUser }: Props) {
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
 
   const toast = useToast();
+
+  const assignmentRef = useRef(assignments);
+
+  const UpdateAssignments = () => {
+    setAssignments(assignmentRef.current.sort(compareAssignments));
+  };
+
+  const Focus = () => {
+    UpdateAssignments();
+
+    interval = setInterval(UpdateAssignments, 1000 * 60 * 10);
+  };
+  const Blur = () => {
+    clearInterval(interval);
+  };
+
+  useEffect(() => {
+    UpdateAssignments();
+    document.addEventListener("focus", Focus);
+    document.addEventListener("blur", Blur);
+
+    return () => {
+      document.removeEventListener("focus", Focus);
+      document.removeEventListener("blur", Blur);
+    };
+  }, []);
+
+  useEffect(() => {
+    assignmentRef.current = assignments;
+    UpdateAssignments();
+  }, [assignments]);
 
   const FetchData = async () => {
     setLoading(true);

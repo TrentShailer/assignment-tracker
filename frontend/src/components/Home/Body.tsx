@@ -14,21 +14,16 @@ interface Props {
   courses: Course[];
 }
 
-let interval: number;
-
 export default function Body({ FetchData, assignments, courses }: Props) {
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const [openAssignment, setOpenAssignment] = useState<Assignment>(null);
   const [openCourse, setOpenCourse] = useState<Course>(null);
 
-  const assignmentRef = useRef(assignments);
-
   const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([]);
 
   const GetActiveAssignments = () => {
-    console.log("Fn: ", assignments);
     setActiveAssignments(
-      assignmentRef.current.filter(
+      assignments.filter(
         (assignment) =>
           assignment.out_date.isBefore(dayjs()) &&
           assignment.progress < 100 &&
@@ -37,30 +32,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
     );
   };
 
-  const Focus = () => {
-    console.log("Focus: ", assignments);
-    GetActiveAssignments();
-
-    interval = setInterval(GetActiveAssignments, 1000 * 60 * 10);
-  };
-  const Blur = () => {
-    clearInterval(interval);
-  };
-
   useEffect(() => {
-    console.log("Load: ", assignments);
-    GetActiveAssignments();
-    document.addEventListener("focus", Focus);
-    document.addEventListener("blur", Blur);
-
-    return () => {
-      document.removeEventListener("focus", Focus);
-      document.removeEventListener("blur", Blur);
-    };
-  }, []);
-
-  useEffect(() => {
-    assignmentRef.current = assignments;
     GetActiveAssignments();
   }, [assignments]);
 

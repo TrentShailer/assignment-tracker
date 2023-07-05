@@ -21,33 +21,30 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   const [openAssignment, setOpenAssignment] = useState<Assignment>(null);
   const [openCourse, setOpenCourse] = useState<Course>(null);
 
-  const GetActiveAssignments = (): Assignment[] => {
-    return assignments.filter(
-      (assignment) =>
-        assignment.out_date.isBefore(dayjs()) &&
-        assignment.progress < 100 &&
-        assignment.due_date.isAfter(dayjs())
+  const GetActiveAssignments = () => {
+    setActiveAssignments(
+      assignments.filter(
+        (assignment) =>
+          assignment.out_date.isBefore(dayjs()) &&
+          assignment.progress < 100 &&
+          assignment.due_date.isAfter(dayjs())
+      )
     );
   };
 
-  const [activeAssignments, setActiveAssignments] = useState<Assignment[]>(
-    GetActiveAssignments()
-  );
+  const [activeAssignments, setActiveAssignments] = useState<Assignment[]>();
 
   const FocusIn = () => {
-    setActiveAssignments(GetActiveAssignments());
+    GetActiveAssignments();
 
-    interval = setInterval(
-      () => setActiveAssignments(GetActiveAssignments()),
-      1000 * 60 * 10
-    );
+    interval = setInterval(GetActiveAssignments, 1000 * 60 * 10);
   };
   const FocusOut = () => {
     clearInterval(interval);
   };
 
   useEffect(() => {
-    setActiveAssignments(GetActiveAssignments());
+    GetActiveAssignments();
     document.addEventListener("focusin", FocusIn);
     document.addEventListener("focusout", FocusOut);
 
@@ -58,8 +55,12 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   }, []);
 
   useEffect(() => {
-    setActiveAssignments(GetActiveAssignments());
+    GetActiveAssignments();
   }, [assignments]);
+
+  useEffect(() => {
+    console.log(activeAssignments);
+  }, [activeAssignments]);
 
   const OpenAssignment = (assignment: Assignment | null, course: Course) => {
     setOpenAssignment(assignment);

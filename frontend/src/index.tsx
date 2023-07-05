@@ -31,8 +31,7 @@ const FetchSession = async (): Promise<User | null> => {
       }
     }
   }
-  // TODO RESET return null;
-  return { id: "", username: "Trent" };
+  return null;
 };
 
 export function App() {

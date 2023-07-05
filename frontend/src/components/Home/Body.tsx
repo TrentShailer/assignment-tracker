@@ -24,7 +24,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([]);
 
   const GetActiveAssignments = () => {
-    console.log("Test");
+    console.log(assignments);
     setActiveAssignments(
       assignments.filter(
         (assignment) =>
@@ -58,10 +58,6 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   useEffect(() => {
     GetActiveAssignments();
   }, [assignments]);
-
-  useEffect(() => {
-    console.log(activeAssignments);
-  }, [activeAssignments]);
 
   const OpenAssignment = (assignment: Assignment | null, course: Course) => {
     setOpenAssignment(assignment);

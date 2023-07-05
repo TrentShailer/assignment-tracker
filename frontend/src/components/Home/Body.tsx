@@ -61,7 +61,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   const OpenAssignment = (assignment: Assignment | null, course: Course) => {
     setOpenAssignment(assignment);
     setOpenCourse(course);
-    setAssignmentModalOpen(true);
+    //setAssignmentModalOpen(true);
   };
 
   return (

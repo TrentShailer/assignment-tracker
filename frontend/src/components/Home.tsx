@@ -137,15 +137,9 @@ export default function Home({ user, SetUser }: Props) {
       return;
     }
 
-    console.log("Test: ", assignments);
-
     setCourses(courses);
     setAssignments(assignments);
   };
-
-  useEffect(() => {
-    console.log(assignments);
-  }, [assignments]);
 
   useEffect(() => {
     FetchData();

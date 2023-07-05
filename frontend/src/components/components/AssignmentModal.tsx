@@ -42,7 +42,6 @@ export default function AssignmentModal({
 
   useEffect(() => {
     if (assignment !== null) {
-      console.log(assignment);
       setName(assignment.name);
       setDueDate(assignment.due_date);
       setOutDate(assignment.out_date);

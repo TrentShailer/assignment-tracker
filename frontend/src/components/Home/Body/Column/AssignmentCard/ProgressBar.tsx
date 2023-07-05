@@ -4,18 +4,18 @@ import { Progress } from "@chakra-ui/react";
 import { useEffect, useState } from "preact/hooks";
 
 interface Props {
-  assignment: Assignment;
+  progress: number;
 }
 
-export default function ProgressBar({ assignment }: Props) {
+export default function ProgressBar({ progress }: Props) {
   const [color, setColor] = useState("red");
 
   useEffect(() => {
-    if (assignment.progress > 90) setColor("green");
-    else if (assignment.progress > 75) setColor("yellow");
-    else if (assignment.progress > 50) setColor("orange");
+    if (progress > 90) setColor("green");
+    else if (progress > 75) setColor("yellow");
+    else if (progress > 50) setColor("orange");
     else setColor("red");
-  }, [assignment.progress]);
+  }, [progress]);
 
-  return <Progress colorScheme={color} value={assignment.progress} />;
+  return <Progress colorScheme={color} value={progress} />;
 }

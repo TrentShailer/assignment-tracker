@@ -33,7 +33,6 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   };
 
   useEffect(() => {
-    console.log(assignments);
     GetActiveAssignments();
   }, [assignments]);
 

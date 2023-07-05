@@ -37,7 +37,7 @@ export default function AssignmentCard({
       <Text>
         {course.name} — {assignment.name}
       </Text>
-      <ProgressBar assignment={assignment} />
+      <ProgressBar progress={assignment.progress} />
       <TimeText assignment={assignment} />
       <TimeProgress assignment={assignment} />
     </Card>

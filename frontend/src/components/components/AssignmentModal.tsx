@@ -41,11 +41,17 @@ export default function AssignmentModal({
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    setLoading(false);
     if (assignment !== null) {
       setName(assignment.name);
       setDueDate(assignment.due_date);
       setOutDate(assignment.out_date);
       setProgress(assignment.progress);
+    } else {
+      setName("");
+      setOutDate(null);
+      setDueDate(null);
+      setProgress(0);
     }
   }, [assignment]);
 

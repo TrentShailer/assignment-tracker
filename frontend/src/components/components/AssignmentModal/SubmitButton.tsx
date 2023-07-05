@@ -127,7 +127,10 @@ export default function SubmitButton({
     );
     if (result === true) {
       FetchData();
-      toast({ title: "Created Assignment", status: "success" });
+      toast({
+        title: `${assignment ? "Edited" : "Created"} Assignment`,
+        status: "success",
+      });
       Close();
     } else if (result === "error.session" || result === "error.fk") {
       FetchData();

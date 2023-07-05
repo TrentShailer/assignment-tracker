@@ -2,7 +2,6 @@ import { Box } from "@chakra-ui/react";
 import React from "preact";
 import Icon from "../../../../components/Icon";
 import { useState } from "preact/hooks";
-import AssignmentModal from "../../../../components/AssignmentModal";
 import { Assignment, Course } from "../../../../Home";
 
 interface Props {

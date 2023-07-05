@@ -68,7 +68,11 @@ export default function Body({ FetchData, assignments, courses }: Props) {
     <Box>
       <AssignmentModal
         isOpen={assignmentModalOpen}
-        onClose={() => setAssignmentModalOpen(false)}
+        onClose={() => {
+          setOpenAssignment(null);
+          setOpenCourse(null);
+          setAssignmentModalOpen(false);
+        }}
         FetchData={FetchData}
         assignment={openAssignment}
         course={openCourse}

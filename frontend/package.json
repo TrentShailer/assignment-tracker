@@ -1,0 +1,30 @@
+{
+	"name": "example",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@chakra-ui/react": "^2.7.1",
+		"@emotion/react": "^11.11.1",
+		"@emotion/styled": "^11.11.0",
+		"axios": "^1.4.0",
+		"dayjs": "^1.11.9",
+		"framer-motion": "^10.12.18",
+		"preact": "^10.13.1"
+	},
+	"devDependencies": {
+		"@babel/core": "^7.22.5",
+		"@babel/plugin-transform-react-jsx": "^7.22.5",
+		"@babel/plugin-transform-react-jsx-development": "^7.22.5",
+		"@chakra-ui/styled-system": "^2.9.1",
+		"@chakra-ui/theme": "^3.1.2",
+		"@preact/preset-vite": "^2.5.0",
+		"babel-plugin-transform-hook-names": "^1.0.2",
+		"typescript": "^5.1.6",
+		"vite": "^4.3.2"
+	}
+}

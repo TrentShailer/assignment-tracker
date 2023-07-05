@@ -24,6 +24,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([]);
 
   const GetActiveAssignments = () => {
+    console.log("Test");
     setActiveAssignments(
       assignments.filter(
         (assignment) =>

@@ -85,20 +85,20 @@ const compareAssignments = (a: Assignment, b: Assignment): number => {
   const bOut = b.out_date.isBefore(dayjs());
 
   // If only one is out, sort it first
-  if (aOut && !bOut) return 1;
-  if (!aOut && bOut) return -1;
+  if (aOut && !bOut) return -1;
+  if (!aOut && bOut) return 1;
 
   // If a is out and b is out, sort the due soonest first
   if (aOut && bOut) {
     const aDiff = Math.abs(a.due_date.diff(dayjs()));
     const bDiff = Math.abs(b.due_date.diff(dayjs()));
-    return aDiff < bDiff ? 1 : -1;
+    return aDiff < bDiff ? -1 : 1;
   }
 
   // If a is not out and b is not out, sort the out soonest first
   const aDiff = Math.abs(a.out_date.diff(dayjs()));
   const bDiff = Math.abs(b.out_date.diff(dayjs()));
-  return aDiff < bDiff ? 1 : -1;
+  return aDiff < bDiff ? -1 : 1;
 };
 
 export default function Home({ user, SetUser }: Props) {

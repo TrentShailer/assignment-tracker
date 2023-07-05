@@ -7,7 +7,7 @@ import {
   SliderThumb,
 } from "@chakra-ui/react";
 import React from "preact";
-import { StateUpdater } from "preact/hooks";
+import { StateUpdater, useEffect, useState } from "preact/hooks";
 
 interface Props {
   progress: number;
@@ -15,16 +15,13 @@ interface Props {
 }
 
 export default function ProgressBar({ progress, setProgress }: Props) {
-  const onChangeEnd = (value: number) => {
-    setProgress(value);
-  };
   return (
     <Box>
       <Text>Progress</Text>
       <Slider
         aria-label="Progress"
         value={progress}
-        onChangeEnd={onChangeEnd}
+        onChange={setProgress}
         step={1}
       >
         <SliderTrack>

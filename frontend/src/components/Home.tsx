@@ -133,7 +133,7 @@ export default function Home({ user, SetUser }: Props) {
   const Focus = () => {
     UpdateAssignments();
 
-    interval = setInterval(UpdateAssignments, 1000 * 60 * 10);
+    interval = setInterval(UpdateAssignments, 1000 * 60);
   };
   const Blur = () => {
     clearInterval(interval);

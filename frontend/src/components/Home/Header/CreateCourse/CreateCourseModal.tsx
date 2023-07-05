@@ -92,7 +92,7 @@ export default function CreateCourseModal({
     if (result === true) {
       toast({ title: "Created Course", status: "success" });
       FetchData();
-      onClose();
+      Exit();
     } else if (result === "error.session" || result === "error.fk") {
       FetchData();
     } else {

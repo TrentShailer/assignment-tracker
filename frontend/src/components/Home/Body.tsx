@@ -2,7 +2,7 @@ import React from "preact";
 import { User } from "../..";
 import { Box, Card, Flex, Stack, useToast } from "@chakra-ui/react";
 import dayjs, { Dayjs } from "dayjs";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import Column from "./Body/Column";
 import axios from "axios";
 import AssignmentModal from "../components/AssignmentModal";
@@ -21,12 +21,14 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   const [openAssignment, setOpenAssignment] = useState<Assignment>(null);
   const [openCourse, setOpenCourse] = useState<Course>(null);
 
+  const assignmentRef = useRef(assignments);
+
   const [activeAssignments, setActiveAssignments] = useState<Assignment[]>([]);
 
   const GetActiveAssignments = () => {
     console.log("Fn: ", assignments);
     setActiveAssignments(
-      assignments.filter(
+      assignmentRef.current.filter(
         (assignment) =>
           assignment.out_date.isBefore(dayjs()) &&
           assignment.progress < 100 &&
@@ -58,7 +60,8 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   }, []);
 
   useEffect(() => {
-    //GetActiveAssignments();
+    assignmentRef.current = assignments;
+    GetActiveAssignments();
   }, [assignments]);
 
   const OpenAssignment = (assignment: Assignment | null, course: Course) => {

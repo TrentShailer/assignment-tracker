@@ -35,23 +35,23 @@ export default function Body({ FetchData, assignments, courses }: Props) {
     );
   };
 
-  const FocusIn = () => {
+  const Focus = () => {
     GetActiveAssignments();
 
     interval = setInterval(GetActiveAssignments, 1000 * 60 * 10);
   };
-  const FocusOut = () => {
+  const Blur = () => {
     clearInterval(interval);
   };
 
   useEffect(() => {
     GetActiveAssignments();
-    document.addEventListener("focusin", FocusIn);
-    document.addEventListener("focusout", FocusOut);
+    document.addEventListener("focus", Focus);
+    document.addEventListener("blur", Blur);
 
     return () => {
-      document.removeEventListener("focusin", FocusIn);
-      document.removeEventListener("focusout", FocusOut);
+      document.removeEventListener("focus", Focus);
+      document.removeEventListener("blur", Blur);
     };
   }, []);
 

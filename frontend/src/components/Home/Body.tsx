@@ -36,6 +36,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   };
 
   const Focus = () => {
+    console.log("Focus");
     GetActiveAssignments();
 
     interval = setInterval(GetActiveAssignments, 1000 * 60 * 10);
@@ -45,6 +46,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   };
 
   useEffect(() => {
+    console.log("Load");
     GetActiveAssignments();
     document.addEventListener("focus", Focus);
     document.addEventListener("blur", Blur);
@@ -56,7 +58,6 @@ export default function Body({ FetchData, assignments, courses }: Props) {
   }, []);
 
   useEffect(() => {
-    console.log(assignments);
     //GetActiveAssignments();
   }, [assignments]);
 

@@ -5,6 +5,7 @@ import {
 	ModalCloseButton,
 	ModalContent,
 	ModalHeader,
+	useToast,
 	UseToastOptions,
 	ModalOverlay,
 	Input,
@@ -127,7 +128,4 @@ export default function ImportCourseModal({ isOpen, onClose, FetchData }: Props)
 			</ModalContent>
 		</Modal>
 	);
-}
-function useToast() {
-	throw new Error("Function not implemented.");
 }

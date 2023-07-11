@@ -46,9 +46,9 @@ const trySubmit = async (
 			  }
 			| { ok: false; reason: "error.not_found" | "error.server" | "error.null" | "error.fk" };
 
-		const result = await axios.post<Result>("/api/v1/courses/import", { course_id: code });
-		if (result.ok === true) return true;
-		return result.reason;
+		const { data } = await axios.post<Result>("/api/v1/courses/import", { course_id: code });
+		if (data.ok === true) return true;
+		return data.reason;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			if (error.code === "401") {

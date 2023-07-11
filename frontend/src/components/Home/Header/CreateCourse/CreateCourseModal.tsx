@@ -46,13 +46,11 @@ const trySubmit = async (
 
 	try {
 		type Data =
-			| { ok: true; course: Course }
+			| { ok: true }
 			| { ok: false; reason: "error.null" | "error.fk" | "error.not_found" };
 		const { data } = await axios.post<Data>(`/api/v1/courses`, {
 			name,
 		});
-
-		console.log(data);
 
 		if (data.ok === true) {
 			return true;

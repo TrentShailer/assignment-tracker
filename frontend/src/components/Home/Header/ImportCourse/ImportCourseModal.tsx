@@ -5,22 +5,16 @@ import {
 	ModalCloseButton,
 	ModalContent,
 	ModalHeader,
+	UseToastOptions,
 	ModalOverlay,
 	Input,
 	ModalFooter,
 	Button,
-	useToast,
-	UseToastOptions,
-	RadioGroup,
-	Stack,
-	Radio,
-	Divider,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "preact";
 import { ChangeEvent } from "preact/compat";
 import { useState } from "preact/hooks";
-import { Course } from "../../../Home";
 
 interface Props {
 	isOpen: boolean;
@@ -29,31 +23,31 @@ interface Props {
 }
 
 const ErrorMessage: Record<string, UseToastOptions> = {
-	"error.null": { title: "Invalid Course Name", status: "warning" },
-	"error.fk": { title: "Invalid Course Name", status: "warning" },
+	"error.null": { title: "Invalid Course Code", status: "warning" },
+	"error.fk": { title: "Invalid Course Code", status: "warning" },
 	"error.server": { title: "Something went wrong", status: "error" },
 	"error.session": { title: "Your session has expired", status: "error" },
 	"error.not_found": {
-		title: "This course no longer exists",
+		title: "This course doesn't exist",
 		status: "warning",
 	},
 };
 
 const trySubmit = async (
-	name: string
-): Promise<true | "error.null" | "error.server" | "error.session" | "error.fk"> => {
-	if (name === "") return "error.null";
-
+	code: string
+): Promise<
+	true | "error.not_found" | "error.server" | "error.fk" | "error.null" | "error.session"
+> => {
 	try {
-		type Data = { ok: true; course: Course } | { ok: false; reason: "error.null" | "error.fk" };
-		const { data } = await axios.post<Data>(`/api/v1/courses`, {
-			name,
-		});
+		type Result =
+			| {
+					ok: true;
+			  }
+			| { ok: false; reason: "error.not_found" | "error.server" | "error.null" | "error.fk" };
 
-		if (data.ok === true) {
-			return true;
-		}
-		return data.reason;
+		const result = await axios.post<Result>("/api/v1/courses/import", { course_id: code });
+		if (result.ok === true) return true;
+		return result.reason;
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			if (error.code === "401") {
@@ -64,29 +58,17 @@ const trySubmit = async (
 	}
 };
 
-export default function CreateCourseModal({ isOpen, onClose, FetchData }: Props) {
-	const [name, setName] = useState("");
+export default function ImportCourseModal({ isOpen, onClose, FetchData }: Props) {
+	const [code, setCode] = useState("");
 	const [loading, setLoading] = useState(false);
-
 	const toast = useToast();
-	const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-		const value = (e.target as HTMLInputElement).value;
-		if (value.length > 256) return;
-		setName(value);
-	};
 
-	const onKeyDown = (e: KeyboardEvent) => {
-		if (e.key === "Enter") {
-			e.preventDefault();
-			Submit();
-		}
-	};
 	const Submit = async () => {
 		setLoading(true);
-		const result = await trySubmit(name);
+		const result = await trySubmit(code);
 
 		if (result === true) {
-			toast({ title: "Created Course", status: "success" });
+			toast({ title: "Imported Course", status: "success" });
 			FetchData();
 			Exit();
 		} else if (result === "error.session" || result === "error.fk") {
@@ -99,26 +81,38 @@ export default function CreateCourseModal({ isOpen, onClose, FetchData }: Props)
 	};
 
 	const Exit = () => {
-		setName("");
-		setLoading(false);
+		setCode("");
 		onClose();
+	};
+
+	const onKeyDown = (e: KeyboardEvent) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			Submit();
+		}
+	};
+
+	const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+		const value = (e.target as HTMLInputElement).value;
+		if (value.length > 36) return;
+		setCode(value);
 	};
 
 	return (
 		<Modal isOpen={isOpen} onClose={Exit}>
 			<ModalOverlay />
 			<ModalContent>
-				<ModalHeader>Create Course</ModalHeader>
+				<ModalHeader>Import Course</ModalHeader>
 				<ModalCloseButton isDisabled={loading} />
 				<ModalBody>
-					<Text>Course Name</Text>
+					<Text>Course Code</Text>
 					<Input
 						isDisabled={loading}
-						value={name}
+						value={code}
 						onKeyDown={onKeyDown}
 						onChange={onChange}
 						autofocus
-						placeholder="Enter course name"
+						placeholder="Enter course code"
 					/>
 				</ModalBody>
 
@@ -127,10 +121,13 @@ export default function CreateCourseModal({ isOpen, onClose, FetchData }: Props)
 						Cancel
 					</Button>
 					<Button isLoading={loading} colorScheme="blue" onClick={Submit}>
-						Create
+						Import
 					</Button>
 				</ModalFooter>
 			</ModalContent>
 		</Modal>
 	);
+}
+function useToast() {
+	throw new Error("Function not implemented.");
 }

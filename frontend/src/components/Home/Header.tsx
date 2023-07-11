@@ -6,6 +6,7 @@ import dayjs, { Dayjs } from "dayjs";
 import LogoutButton from "./Header/LogoutButton";
 import CreateCourse from "./Header/CreateCourse";
 import Reload from "./Header/Reload";
+import ImportCourse from "./Header/ImportCourse";
 
 interface Props {
 	user: User;
@@ -38,6 +39,7 @@ export default function Header({ user, SetUser, FetchData }: Props) {
 			</Heading>
 			<Stack direction="row" gap={4}>
 				<CreateCourse FetchData={FetchData} />
+				<ImportCourse FetchData={FetchData} />
 				<Reload FetchData={FetchData} />
 				<LogoutButton SetUser={SetUser} />
 			</Stack>

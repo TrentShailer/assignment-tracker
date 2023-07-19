@@ -45,7 +45,7 @@ const GetCourses = async (): Promise<
     return data.courses;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if (error.code === "401") {
+      if (error.response.status === 401) {
         return "error.session";
       }
     }
@@ -62,7 +62,7 @@ const GetAssignments = async (): Promise<
     return parseAssignments(data.assignments);
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if (error.code === "401") {
+      if (error.response.status === 401) {
         return "error.session";
       }
     }

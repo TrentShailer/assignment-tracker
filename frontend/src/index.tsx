@@ -20,14 +20,12 @@ const FetchSession = async (): Promise<User | null> => {
   try {
     type GetUser = { ok: true; user: User };
     const { data } = await axios.get<GetUser>("/api/v1/user");
-    console.log(data);
     if (data.ok === true) {
       return data.user;
     }
   } catch (error) {
-    console.error(error);
     if (axios.isAxiosError(error)) {
-      if (error.code === "401") {
+      if (error.response.status === 401) {
         return null;
       }
     }

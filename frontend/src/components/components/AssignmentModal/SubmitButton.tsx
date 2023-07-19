@@ -92,7 +92,7 @@ const trySubmit = async (
     return data.reason;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      if (error.code === "401") {
+      if (error.response.status === 401) {
         return "error.session";
       }
     }

@@ -25,7 +25,7 @@ const FetchSession = async (): Promise<User | null> => {
       return data.user;
     }
   } catch (error) {
-    console.error(error);
+    console.error(error.response.status);
     if (axios.isAxiosError(error)) {
       if (error.response.status === 401) {
         return null;

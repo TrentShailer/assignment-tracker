@@ -20,12 +20,11 @@ const FetchSession = async (): Promise<User | null> => {
   try {
     type GetUser = { ok: true; user: User };
     const { data } = await axios.get<GetUser>("/api/v1/user");
-    console.log(data);
+
     if (data.ok === true) {
       return data.user;
     }
   } catch (error) {
-    console.error(error.response.status);
     if (axios.isAxiosError(error)) {
       if (error.response.status === 401) {
         return null;
@@ -71,8 +70,7 @@ export function App() {
         ) : user ? (
           <Home user={user} SetUser={SetUser} />
         ) : (
-          // <Auth SetUser={SetUser} />
-          <Home user={user} SetUser={SetUser} />
+          <Auth SetUser={SetUser} />
         )}
       </Box>
     </ChakraProvider>

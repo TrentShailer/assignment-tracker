@@ -37,19 +37,19 @@ fastify
 
     fastify.decorate("verifySession", async (request, reply) => {
       const user_id = request.session.get("user_id");
-      if (!user_id) throw new Error("error.session");
+      if (!user_id) return reply.status(401).send();
 
       const { rows } = await fastify.pg.query<{ username: string }>(
         "SELECT username FROM users WHERE id = $1;",
         [user_id]
       );
-      if (rows.length === 0) throw new Error("error.not_found");
+      if (rows.length === 0) return reply.status(401).send();
 
       request.user = { username: rows[0].username, id: user_id };
     });
 
     fastify.decorate("verifyCourseAccess", async (request, reply) => {
-      if (!request.user) throw new Error("error.session");
+      if (!request.user) return reply.status(401).send();
 
       const params: any = request.params;
       const course_id = params.course_id;
@@ -63,13 +63,13 @@ fastify
         [course_id, request.user.id]
       );
 
-      if (rows.length === 0) throw new Error("error.access");
+      if (rows.length === 0) return reply.status(403).send();
 
       request.course = { id: course_id, name: rows[0].name };
     });
 
     fastify.decorate("verifyAssignmentAccess", async (request, reply) => {
-      if (!request.user) throw new Error("error.session");
+      if (!request.user) return reply.status(401).send();
 
       const params: any = request.params;
       const assignment_id = params.assignment_id;
@@ -89,7 +89,7 @@ fastify
         [assignment_id, request.user.id]
       );
 
-      if (rows.length === 0) throw new Error("error.access");
+      if (rows.length === 0) return reply.status(403).send();
 
       request.assignment = { id: assignment_id, ...rows[0] };
     });

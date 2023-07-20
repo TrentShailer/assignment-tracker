@@ -24,7 +24,7 @@ fastify
       sessionName: "session",
       cookieName: "session",
       key: Buffer.from(fastify.config.SESSION_KEY, "hex"),
-      cookie: { path: "/", httpOnly: true, maxAge: 1 * 60 * 60 * 24 * 14 },
+      cookie: { path: "/", httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 14 },
     });
 
     fastify.register(fastifyPostgres, {
@@ -45,7 +45,10 @@ fastify
       );
       if (rows.length === 0) return reply.status(401).send();
 
-      request.user = { username: rows[0].username, id: user_id };
+      request.session.request.user = {
+        username: rows[0].username,
+        id: user_id,
+      };
     });
 
     fastify.decorate("verifyCourseAccess", async (request, reply) => {

@@ -24,7 +24,7 @@ fastify
       sessionName: "session",
       cookieName: "session",
       key: Buffer.from(fastify.config.SESSION_KEY, "hex"),
-      cookie: { path: "/", httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 14 },
+      cookie: { path: "/", httpOnly: true, maxAge: 60 * 60 * 24 * 14 },
     });
 
     fastify.register(fastifyPostgres, {

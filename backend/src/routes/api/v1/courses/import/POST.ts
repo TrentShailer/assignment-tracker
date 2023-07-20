@@ -37,6 +37,17 @@ const GetCourseName = async (
   }
 };
 
+const ValidateCourseId = async (course_id: string): Promise<boolean> => {
+  if (!course_id || course_id.length !== 36) return false;
+  if (
+    !course_id.match(
+      /^\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b$/
+    )
+  )
+    return false;
+  return true;
+};
+
 export default async function (fastify: FastifyInstance) {
   fastify.post<{ Body: Body }>(
     "/",
@@ -49,6 +60,12 @@ export default async function (fastify: FastifyInstance) {
             message: "user undefined",
           };
         const { course_id } = request.body;
+
+        const valid = await ValidateCourseId(course_id);
+
+        if (valid === false) {
+          return reply.send({ ok: false, reason: "error.not_found" });
+        }
 
         // Fetch the course (course name)
         const courseName = await GetCourseName(course_id, fastify);

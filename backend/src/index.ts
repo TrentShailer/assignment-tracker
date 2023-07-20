@@ -45,7 +45,7 @@ fastify
       );
       if (rows.length === 0) return reply.status(401).send();
 
-      request.session.request.user = {
+      request.user = {
         username: rows[0].username,
         id: user_id,
       };

@@ -1,0 +1,412 @@
+openapi: "3.0.2"
+info:
+  title: Assignment Tracker API
+  version: "1.0"
+servers:
+  - url: https://uni.trentshailer.com/api/v1
+paths:
+  /session:
+    post:
+      description: Create a session from a username and password.
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: Created session and set cookies
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          $ref: "#/components/responses/400"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      description: Delete a user session (logout)
+      responses:
+        "200":
+          description: Session successfully deleted
+        "500":
+          $ref: "#/components/responses/500"
+  /user:
+    get:
+      description: Get the currently logged in user's data from their session
+      responses:
+        "200":
+          description: User is logged in and was able to retrieve their session
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Session"
+        "401":
+          $ref: "#/components/responses/401"
+        "410":
+          $ref: "#/components/responses/500"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      description: Delete the logged in user's account
+      responses:
+        "200":
+          description: Successfully deleted user's accont
+        "401":
+          $ref: "#/components/responses/401"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+  /users:
+    post:
+      description: Create a new user
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: Successfully created user
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Session"
+        "400":
+          $ref: "#/components/responses/400"
+        "500":
+          $ref: "#/components/responses/500"
+  /assignments:
+    get:
+      description: Get all the assignments for the logged in user
+      responses:
+        "200":
+          description: Retrieved assignments
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assignment"
+        "401":
+          $ref: "#/components/responses/401"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+  /courses:
+    get:
+      description: Get all the courses for the logged in user
+      responses:
+        "200":
+          description: Retrieved courses
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        "401":
+          $ref: "#/components/responses/401"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+    post:
+      description: Create a new course for the currently logged in user
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Created course
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Course"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+  /courses/import:
+    post:
+      description: Import another user's course and it's assignments
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                course_id:
+                  type: string
+      responses:
+        "201":
+          description: Successfully imported course
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          description: Couldn't find a course to match the course_id
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Error"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+  /courses/{course_id}:
+    put:
+      description: Overwrite an existing course
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "200":
+          description: Successfully updated course
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Course"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          description: Couldn't find a course to match the course_id owned by the user
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Error"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      description: Delete a course
+      responses:
+        "200":
+          description: Successfully deleted the course
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          description: Couldn't find a course to match the course_id owned by the user
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Error"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+  /courses/{course_id}/assignments:
+    post:
+      description: Create a new assignment for a course
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                out_date:
+                  type: object
+                  format: Date
+                due_date:
+                  type: object
+                  format: Date
+                progress:
+                  type: number
+      responses:
+        "201":
+          description: Created the assignment
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Assignment"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          description: Couldn't find the course id requested for the assignment
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Error"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+  /courses/{course_id}/assignment/{assignment_id}:
+    put:
+      description: Overwrite an existing assignment
+      requestBody:
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                out_date:
+                  type: object
+                  format: Date
+                due_date:
+                  type: object
+                  format: Date
+                progress:
+                  type: number
+      responses:
+        "200":
+          description: Updated the assignment
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Assignment"
+        "400":
+          $ref: "#/components/responses/400"
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          description: Couldn't find the course id requested for the assignment or the assignment
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Error"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+    delete:
+      description: Delete an assignment
+      responses:
+        "200":
+          description: Deleted the assignment
+        "401":
+          $ref: "#/components/responses/401"
+        "404":
+          description: Couldn't find the course id requested for the assignment or the assignment
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/Error"
+        "410":
+          $ref: "#/components/responses/UserDeleted"
+        "500":
+          $ref: "#/components/responses/500"
+
+components:
+  responses:
+    "UserDeleted":
+      description: User's account no longer exists and request could not be completed
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/Error"
+    "500":
+      description: Internal server error
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/Error"
+    "400":
+      description: Some content provided by the user is incorrect
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/Error"
+    "401":
+      description: The user is not logged in
+      content:
+        "application/json":
+          schema:
+            $ref: "#/components/schemas/Error"
+  schemas:
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        course_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        out_date:
+          type: object
+          format: Date
+        due_date:
+          type: object
+          format: Date
+        progress:
+          type: number
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+    ErrorMessage:
+      description: User-presentable reason for the error
+      type: string
+      example:
+        - Username or password was invalid
+        - Your session has expired
+        - You don't have permission to access this assignment
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          $ref: "#/components/schemas/ErrorMessage"
+        fields:
+          description: The list of fields with errors
+          type: array
+          items:
+            type: object
+            properties:
+              field_name:
+                type: string
+              message:
+                $ref: "#/components/schemas/ErrorMessage"
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 256
+        password:
+          type: string
+          minLength: 1
+          maxLength: 256

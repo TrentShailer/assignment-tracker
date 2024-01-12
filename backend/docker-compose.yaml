@@ -1,21 +1,21 @@
 services:
-  server:
-    image: trentshailer/assignment-tracker:latest
-    env_file:
-      - ./.env
-    ports:
-      - 4000:8080
-    depends_on:
-      - database
-    restart: unless-stopped
-  database:
-    image: postgres:15-alpine
-    env_file:
-      - ./.env
-    volumes:
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - postgres-data:/var/lib/postgresql/data
-    restart: always
+    server:
+        image: trentshailer/assignment-tracker:latest
+        env_file:
+            - ./.env
+        ports:
+            - 4000:8080
+        depends_on:
+            - database
+        restart: unless-stopped
+    database:
+        image: postgres:16-alpine
+        env_file:
+            - ./database.env
+        volumes:
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+            - postgres-data:/var/lib/postgresql/data
+        restart: always
 
 volumes:
-  postgres-data:
+    postgres-data:

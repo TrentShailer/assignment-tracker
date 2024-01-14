@@ -2,6 +2,7 @@ mod error_response;
 mod logger;
 mod routes;
 mod types;
+mod utils;
 
 use std::{net::SocketAddr, time::Duration};
 
@@ -17,7 +18,7 @@ use axum::{
 use log::info;
 use routes::{
     create_session::create_session, create_user::create_user, delete_session::delete_session,
-    delete_user::delete_user, get_user::get_user,
+    delete_user::delete_user, get_all_assignments::get_all_assignments, get_user::get_user,
 };
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::{net::TcpListener, task::JoinHandle};
@@ -119,7 +120,7 @@ fn create_router(
         .route("/api/v1/user", get(get_user))
         .route("/api/v1/user", delete(delete_user))
         .route("/api/v1/users", post(create_user))
-        // .route("/api/v1/assignments", get())
+        .route("/api/v1/assignments", get(get_all_assignments))
         // .route("/api/v1/courses", get())
         // .route("/api/v1/courses", post())
         // .route("/api/v1/courses/import", post())

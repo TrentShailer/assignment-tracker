@@ -88,10 +88,10 @@ fn hash_password(password: String) -> Result<String, argon2::password_hash::Erro
 
 fn validate_body(username: &str, password: &str) -> Result<(), Vec<ValidationError>> {
     let mut validation_errors: Vec<ValidationError> = Vec::new();
-    if username.len() < 1 || username.len() > 128 {
+    if username.is_empty() || username.len() > 128 {
         validation_errors.push(ValidationError::UsernameLength);
     }
-    if password.len() < 1 || password.len() > 128 {
+    if password.is_empty() || password.len() > 128 {
         validation_errors.push(ValidationError::PasswordLength);
     }
 
@@ -109,7 +109,7 @@ enum ValidationError {
     PasswordLength,
 }
 impl ValidationError {
-    fn into_field_error(&self) -> FieldError {
+    fn as_field_error(&self) -> FieldError {
         match self {
             ValidationError::UsernameLength => FieldError::new("username", &self.to_string()),
             ValidationError::PasswordLength => FieldError::new("password", &self.to_string()),
@@ -117,7 +117,7 @@ impl ValidationError {
     }
 
     pub fn into_error_response(status: StatusCode, errors: Vec<ValidationError>) -> ErrorResponse {
-        let fields: Vec<FieldError> = errors.iter().map(Self::into_field_error).collect();
+        let fields: Vec<FieldError> = errors.iter().map(Self::as_field_error).collect();
         ErrorResponse::fields(status, fields)
     }
 }

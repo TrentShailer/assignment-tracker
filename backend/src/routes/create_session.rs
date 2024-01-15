@@ -1,4 +1,4 @@
-use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use argon2::{password_hash, Argon2, PasswordHash, PasswordVerifier};
 use axum::{extract::State, http::StatusCode};
 use log::error;
 use serde::{Deserialize, Serialize};
@@ -60,32 +60,30 @@ pub async fn create_session(
 
     let result = Argon2::default().verify_password(body.password.as_bytes(), &parsed_hash);
 
-    match result {
-        Ok(_) => {
-            session
-                .insert(SESSION_USER_ID_KEY, user.id)
-                .await
-                .map_err(|e| {
-                    error!("{}", e);
-                    ErrorResponse::SESSION_ERROR
-                })?;
-            Ok((
-                StatusCode::CREATED,
-                Json(User {
-                    id: user.id,
-                    username: user.username,
-                }),
-            ))
-        }
-        Err(e) => match e {
-            argon2::password_hash::Error::Password => Err(ErrorResponse::basic(
+    if let Err(e) = result {
+        if e == password_hash::Error::Password {
+            return Err(ErrorResponse::basic(
                 StatusCode::BAD_REQUEST,
                 "Username or password are incorrect.",
-            )),
-            _ => {
-                error!("{}", e);
-                Err(ErrorResponse::HASH_ERROR)
-            }
-        },
+            ));
+        }
+        error!("{}", e);
+        return Err(ErrorResponse::HASH_ERROR);
     }
+
+    session
+        .insert(SESSION_USER_ID_KEY, user.id)
+        .await
+        .map_err(|e| {
+            error!("{}", e);
+            ErrorResponse::SESSION_ERROR
+        })?;
+
+    Ok((
+        StatusCode::CREATED,
+        Json(User {
+            id: user.id,
+            username: user.username,
+        }),
+    ))
 }

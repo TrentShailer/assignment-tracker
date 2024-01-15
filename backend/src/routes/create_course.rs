@@ -37,7 +37,7 @@ pub async fn create_course(
         return Err(ErrorResponse::DELETED_USER);
     }
 
-    if body.name.len() == 0 || body.name.len() > 128 {
+    if body.name.is_empty() || body.name.len() > 128 {
         return Err(ErrorResponse::fields(
             StatusCode::BAD_REQUEST,
             vec![FieldError::new(

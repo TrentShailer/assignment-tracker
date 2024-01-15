@@ -54,6 +54,14 @@ impl ErrorResponse {
         StatusCode::UNAUTHORIZED,
         "Your session has expired or you are not logged in.",
     );
+    pub const MISSING_OR_UNOWNED_COURSE: Self = Self::new_const(
+        StatusCode::NOT_FOUND,
+        "No course with that id exists or you do not own it.",
+    );
+    pub const MISSING_OR_UNOWNED_ASSIGNMENT: Self = Self::new_const(
+        StatusCode::NOT_FOUND,
+        "No assignment with that id exists or you do not own it.",
+    );
 
     pub const fn new_const(status: StatusCode, message: &'static str) -> Self {
         Self {
@@ -65,7 +73,7 @@ impl ErrorResponse {
 
     pub fn basic(status: StatusCode, message: &str) -> Self {
         Self {
-            status: status,
+            status,
             message: Cow::Owned(message.to_string()),
             fields: None,
         }
@@ -76,7 +84,7 @@ impl ErrorResponse {
         let message = "Invalid fields: ".to_string() + &field_names.join(", ");
 
         Self {
-            status: status,
+            status,
             message: Cow::Owned(message),
             fields: Some(fields),
         }

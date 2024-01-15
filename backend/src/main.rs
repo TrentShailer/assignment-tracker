@@ -18,10 +18,12 @@ use axum::{
 
 use log::info;
 use routes::{
-    create_course::create_course, create_session::create_session, create_user::create_user,
+    create_assignment::create_assignment, create_course::create_course,
+    create_session::create_session, create_user::create_user, delete_assignment::delete_assignment,
     delete_course::delete_course, delete_session::delete_session, delete_user::delete_user,
     get_all_assignments::get_all_assignments, get_all_courses::get_all_courses, get_user::get_user,
-    import_course::import_course, update_course::update_course,
+    import_course::import_course, update_assignment::update_assignment,
+    update_course::update_course,
 };
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::{net::TcpListener, task::JoinHandle};
@@ -129,9 +131,18 @@ fn create_router(
         .route("/api/courses/import", post(import_course))
         .route("/api/courses/:course_id", put(update_course))
         .route("/api/courses/:course_id", delete(delete_course))
-        // .route("/api/courses/:course_id/assignments", post())
-        // .route("/api/courses/:course_id/assignments/:assignment_id", put())
-        // .route("/api/courses/:course_id/assignments/:assignment_id", delete())
+        .route(
+            "/api/courses/:course_id/assignments",
+            post(create_assignment),
+        )
+        .route(
+            "/api/courses/:course_id/assignments/:assignment_id",
+            put(update_assignment),
+        )
+        .route(
+            "/api/courses/:course_id/assignments/:assignment_id",
+            delete(delete_assignment),
+        )
         .layer(cors)
         .layer(session_layer)
         .with_state(pool)

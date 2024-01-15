@@ -26,6 +26,7 @@ pub fn init_fern() -> Result<(), fern::InitError> {
             ))
         })
         .level(log::LevelFilter::Info)
+        .level_for("tracing", log::LevelFilter::Warn)
         .chain(std::io::stdout())
         .apply()?;
 

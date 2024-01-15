@@ -1,21 +1,23 @@
 use std::borrow::Cow;
 
-use axum::{http::StatusCode, response::IntoResponse, Json};
-use serde::Serialize;
+use axum::{http::StatusCode, response::IntoResponse};
+use serde::{Serialize, Serializer};
 
-#[derive(Serialize)]
-#[serde(remote = "StatusCode")]
-struct StatusCodeDef {
-    #[serde(getter = "StatusCode::as_u16")]
-    code: u16,
-}
+use crate::json_extractor::Json;
 
 #[derive(Debug, Serialize)]
 pub struct ErrorResponse {
-    #[serde(with = "StatusCodeDef")]
+    #[serde(serialize_with = "serialize_status_code")]
     status: StatusCode,
     message: Cow<'static, str>,
     fields: Option<Vec<FieldError>>,
+}
+
+fn serialize_status_code<S>(status: &StatusCode, se: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    se.serialize_u16(status.as_u16())
 }
 
 #[derive(Debug, Serialize)]
@@ -69,10 +71,13 @@ impl ErrorResponse {
         }
     }
 
-    pub fn full(status: StatusCode, message: &str, fields: Vec<FieldError>) -> Self {
+    pub fn fields(status: StatusCode, fields: Vec<FieldError>) -> Self {
+        let field_names: Vec<String> = fields.iter().map(|f| f.field.to_string()).collect();
+        let message = "Invalid fields: ".to_string() + &field_names.join(", ");
+
         Self {
             status: status,
-            message: Cow::Owned(message.to_string()),
+            message: Cow::Owned(message),
             fields: Some(fields),
         }
     }

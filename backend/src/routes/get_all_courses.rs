@@ -1,11 +1,12 @@
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode};
 use log::error;
 use sqlx::PgPool;
 use tower_sessions::Session;
 use uuid::Uuid;
 
 use crate::{
-    error_response::ErrorResponse, types::Course, utils::user_exists, SESSION_USER_ID_KEY,
+    error_response::ErrorResponse, json_extractor::Json, types::Course, utils::user_exists,
+    SESSION_USER_ID_KEY,
 };
 
 pub async fn get_all_courses(

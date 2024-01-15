@@ -1,10 +1,12 @@
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode};
 use log::error;
 use sqlx::PgPool;
 use tower_sessions::Session;
 use uuid::Uuid;
 
-use crate::{error_response::ErrorResponse, types::User, SESSION_USER_ID_KEY};
+use crate::{
+    error_response::ErrorResponse, json_extractor::Json, types::User, SESSION_USER_ID_KEY,
+};
 
 pub async fn get_user(
     State(pool): State<PgPool>,

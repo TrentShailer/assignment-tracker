@@ -1,4 +1,5 @@
 mod error_response;
+mod json_extractor;
 mod logger;
 mod routes;
 mod types;
@@ -17,9 +18,10 @@ use axum::{
 
 use log::info;
 use routes::{
-    create_session::create_session, create_user::create_user, delete_session::delete_session,
-    delete_user::delete_user, get_all_assignments::get_all_assignments,
-    get_all_courses::get_all_courses, get_user::get_user,
+    create_course::create_course, create_session::create_session, create_user::create_user,
+    delete_session::delete_session, delete_user::delete_user,
+    get_all_assignments::get_all_assignments, get_all_courses::get_all_courses, get_user::get_user,
+    import_course::import_course,
 };
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::{net::TcpListener, task::JoinHandle};
@@ -116,20 +118,20 @@ fn create_router(
     session_layer: SessionManagerLayer<PostgresStore>,
 ) -> Router {
     Router::new()
-        .route("/api/v1/session", post(create_session))
-        .route("/api/v1/session", delete(delete_session))
-        .route("/api/v1/user", get(get_user))
-        .route("/api/v1/user", delete(delete_user))
-        .route("/api/v1/users", post(create_user))
-        .route("/api/v1/assignments", get(get_all_assignments))
-        .route("/api/v1/courses", get(get_all_courses))
-        // .route("/api/v1/courses", post())
-        // .route("/api/v1/courses/import", post())
-        // .route("/api/v1/courses/:course_id", put())
-        // .route("/api/v1/courses/:course_id", delete())
-        // .route("/api/v1/courses/:course_id/assignments", post())
-        // .route("/api/v1/courses/:course_id/assignments/:assignment_id", put())
-        // .route("/api/v1/courses/:course_id/assignments/:assignment_id", delete())
+        .route("/api/session", post(create_session))
+        .route("/api/session", delete(delete_session))
+        .route("/api/user", get(get_user))
+        .route("/api/user", delete(delete_user))
+        .route("/api/users", post(create_user))
+        .route("/api/assignments", get(get_all_assignments))
+        .route("/api/courses", get(get_all_courses))
+        .route("/api/courses", post(create_course))
+        .route("/api/courses/import", post(import_course))
+        // .route("/api/courses/:course_id", put())
+        // .route("/api/courses/:course_id", delete())
+        // .route("/api/courses/:course_id/assignments", post())
+        // .route("/api/courses/:course_id/assignments/:assignment_id", put())
+        // .route("/api/courses/:course_id/assignments/:assignment_id", delete())
         .layer(cors)
         .layer(session_layer)
         .with_state(pool)

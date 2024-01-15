@@ -69,12 +69,17 @@ version = "0.1.0"
 dependencies = [
  "argon2",
  "axum",
+ "axum-macros",
+ "bytes",
  "chrono",
  "dotenvy",
  "fern",
  "log",
+ "mime",
  "owo-colors",
  "serde",
+ "serde_json",
+ "serde_path_to_error",
  "sqlx",
  "thiserror",
  "tokio",
@@ -156,9 +161,9 @@ dependencies = [
 
 [[package]]
 name = "axum-core"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e87c8503f93e6d144ee5690907ba22db7ba79ab001a932ab99034f0fe836b3df"
+checksum = "a15c63fd72d41492dc4f497196f5da1fb04fb7529e631d73630d1b491e47a2e3"
 dependencies = [
  "async-trait",
  "bytes",
@@ -173,6 +178,18 @@ dependencies = [
  "tower-layer",
  "tower-service",
  "tracing",
+]
+
+[[package]]
+name = "axum-macros"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "00c055ee2d014ae5981ce1016374e8213682aa14d9bf40e48ab48b5f3ef20eaa"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
 ]
 
 [[package]]

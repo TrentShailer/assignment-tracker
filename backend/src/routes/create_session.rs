@@ -1,15 +1,17 @@
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode};
 use log::error;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use tower_sessions::Session;
 use uuid::Uuid;
 
-use crate::{error_response::ErrorResponse, types::User, SESSION_USER_ID_KEY};
+use crate::{
+    error_response::ErrorResponse, json_extractor::Json, types::User, SESSION_USER_ID_KEY,
+};
 
 #[derive(Deserialize, Serialize)]
-pub struct CreateSessionBody {
+pub struct Body {
     pub username: String,
     pub password: String,
 }
@@ -23,7 +25,7 @@ struct FullUser {
 pub async fn create_session(
     State(pool): State<PgPool>,
     session: Session,
-    Json(body): Json<CreateSessionBody>,
+    Json(body): Json<Body>,
 ) -> Result<(StatusCode, Json<User>), ErrorResponse> {
     let maybe_user = sqlx::query_as!(
         FullUser,

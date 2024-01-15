@@ -2,7 +2,7 @@ use argon2::{
     password_hash::{rand_core::OsRng, SaltString},
     Argon2, PasswordHasher,
 };
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode};
 use log::error;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -11,12 +11,13 @@ use tower_sessions::Session;
 
 use crate::{
     error_response::{ErrorResponse, FieldError},
+    json_extractor::Json,
     types::User,
     SESSION_USER_ID_KEY,
 };
 
 #[derive(Deserialize, Serialize)]
-pub struct CreateUserBody {
+pub struct Body {
     pub username: String,
     pub password: String,
 }
@@ -24,7 +25,7 @@ pub struct CreateUserBody {
 pub async fn create_user(
     State(pool): State<PgPool>,
     session: Session,
-    Json(body): Json<CreateUserBody>,
+    Json(body): Json<Body>,
 ) -> Result<(StatusCode, Json<User>), ErrorResponse> {
     validate_body(&body.username, &body.password)
         .map_err(|e| ValidationError::into_error_response(StatusCode::BAD_REQUEST, e))?;
@@ -48,9 +49,8 @@ pub async fn create_user(
     .await
     .map_err(|e| {
         if is_unique_violation(&e) {
-            ErrorResponse::full(
+            ErrorResponse::fields(
                 StatusCode::BAD_REQUEST,
-                "That username is taken.",
                 vec![FieldError::new("username", "That username is taken.")],
             )
         } else {
@@ -88,11 +88,11 @@ fn hash_password(password: String) -> Result<String, argon2::password_hash::Erro
 
 fn validate_body(username: &str, password: &str) -> Result<(), Vec<ValidationError>> {
     let mut validation_errors: Vec<ValidationError> = Vec::new();
-    if username.len() > 128 {
-        validation_errors.push(ValidationError::UsernameTooLong);
+    if username.len() < 1 || username.len() > 128 {
+        validation_errors.push(ValidationError::UsernameLength);
     }
-    if password.len() > 128 {
-        validation_errors.push(ValidationError::PasswordTooLong);
+    if password.len() < 1 || password.len() > 128 {
+        validation_errors.push(ValidationError::PasswordLength);
     }
 
     match validation_errors.is_empty() {
@@ -103,21 +103,21 @@ fn validate_body(username: &str, password: &str) -> Result<(), Vec<ValidationErr
 
 #[derive(Debug, Error)]
 enum ValidationError {
-    #[error("Username is too long, maximum 128 characters.")]
-    UsernameTooLong,
-    #[error("Password is too long, maximum 128 characters.")]
-    PasswordTooLong,
+    #[error("Username must be between 1-128 characters.")]
+    UsernameLength,
+    #[error("Password must be between 1-128 characters.")]
+    PasswordLength,
 }
 impl ValidationError {
     fn into_field_error(&self) -> FieldError {
         match self {
-            ValidationError::UsernameTooLong => FieldError::new("username", &self.to_string()),
-            ValidationError::PasswordTooLong => FieldError::new("password", &self.to_string()),
+            ValidationError::UsernameLength => FieldError::new("username", &self.to_string()),
+            ValidationError::PasswordLength => FieldError::new("password", &self.to_string()),
         }
     }
 
     pub fn into_error_response(status: StatusCode, errors: Vec<ValidationError>) -> ErrorResponse {
         let fields: Vec<FieldError> = errors.iter().map(Self::into_field_error).collect();
-        ErrorResponse::full(status, "Username or password is invalid.", fields)
+        ErrorResponse::fields(status, fields)
     }
 }

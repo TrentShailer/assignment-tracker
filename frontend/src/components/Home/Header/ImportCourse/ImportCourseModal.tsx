@@ -11,72 +11,27 @@ import {
     Input,
     ModalFooter,
     Button,
+    CreateToastFnReturn,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "preact";
 import { ChangeEvent } from "preact/compat";
 import { useState } from "preact/hooks";
+import { User } from "../../../../../../backend/bindings/User";
+import { ErrorResponse } from "../../../../../../backend/bindings/ErrorResponse";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     FetchData: () => void;
+    SetUser: (user: User | null) => void;
 }
-
-const ErrorMessage: Record<string, UseToastOptions> = {
-    "error.null": { title: "Invalid Course Code", status: "warning" },
-    "error.fk": { title: "Invalid Course Code", status: "warning" },
-    "error.server": { title: "Something went wrong", status: "error" },
-    "error.session": { title: "Your session has expired", status: "error" },
-    "error.not_found": {
-        title: "This course doesn't exist",
-        status: "warning",
-    },
-};
-
-const trySubmit = async (
-    code: string
-): Promise<
-    | true
-    | "error.not_found"
-    | "error.server"
-    | "error.fk"
-    | "error.null"
-    | "error.session"
-> => {
-    try {
-        type Result =
-            | {
-                  ok: true;
-              }
-            | {
-                  ok: false;
-                  reason:
-                      | "error.not_found"
-                      | "error.server"
-                      | "error.null"
-                      | "error.fk";
-              };
-
-        const { data } = await axios.post<Result>("/api/courses/import", {
-            course_id: code,
-        });
-        if (data.ok === true) return true;
-        return data.reason;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            if (error.response.status === 401) {
-                return "error.session";
-            }
-        }
-        return "error.server";
-    }
-};
 
 export default function ImportCourseModal({
     isOpen,
     onClose,
     FetchData,
+    SetUser,
 }: Props) {
     const [code, setCode] = useState("");
     const [loading, setLoading] = useState(false);
@@ -84,18 +39,61 @@ export default function ImportCourseModal({
 
     const Submit = async () => {
         setLoading(true);
-        const result = await trySubmit(code);
-
-        if (result === true) {
-            toast({ title: "Imported Course", status: "success" });
+        try {
+            const { data } = await axios.post<void>("/api/courses/import", {
+                course_id: code,
+            });
+            toast({ title: "Imported course", status: "success" });
             FetchData();
             Exit();
-        } else if (result === "error.session" || result === "error.fk") {
-            FetchData();
-        } else {
-            toast(ErrorMessage[result]);
+        } catch (e) {
+            if (
+                axios.isAxiosError<ErrorResponse>(e) &&
+                e.response !== undefined
+            ) {
+                const error = e.response.data;
+                if (error.status === 401) {
+                    toast({
+                        title: "Failed import course",
+                        description: error.message,
+                        status: "warning",
+                        duration: 5000,
+                    });
+                    SetUser(null);
+                } else if (error.status === 404) {
+                    toast({
+                        title: "Failed import course",
+                        description: error.message,
+                        status: "warning",
+                        duration: 5000,
+                    });
+                } else if (error.status === 410) {
+                    toast({
+                        title: "Failed to import course",
+                        description: error.message,
+                        status: "error",
+                        duration: 5000,
+                    });
+                    SetUser(null);
+                } else if (error.status === 500) {
+                    toast({
+                        title: "Internal server error",
+                        description: error.message,
+                        status: "error",
+                        duration: 5000,
+                    });
+                    console.error(error);
+                }
+            } else {
+                toast({
+                    title: "An unexpected error ocurred",
+                    description: e,
+                    status: "error",
+                    duration: 5000,
+                });
+                console.error(e);
+            }
         }
-
         setLoading(false);
     };
 

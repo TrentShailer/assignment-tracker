@@ -39,8 +39,8 @@ export default function Header({ user, SetUser, FetchData }: Props) {
                 {now}
             </Heading>
             <Stack direction="row" gap={4}>
-                <CreateCourse FetchData={FetchData} />
-                <ImportCourse FetchData={FetchData} />
+                <CreateCourse SetUser={SetUser} FetchData={FetchData} />
+                <ImportCourse SetUser={SetUser} FetchData={FetchData} />
                 <Reload FetchData={FetchData} />
                 <AccountButton SetUser={SetUser} />
             </Stack>

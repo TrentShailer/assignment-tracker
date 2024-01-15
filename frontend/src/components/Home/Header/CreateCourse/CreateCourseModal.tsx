@@ -15,74 +15,39 @@ import {
     Stack,
     Radio,
     Divider,
+    FormControl,
+    FormLabel,
+    FormErrorMessage,
 } from "@chakra-ui/react";
 import axios from "axios";
 import React from "preact";
 import { ChangeEvent } from "preact/compat";
 import { useState } from "preact/hooks";
-import { Course } from "../../../Home";
+import { User } from "../../../../../../backend/bindings/User";
+import { Course } from "../../../../../../backend/bindings/Course";
+import { ErrorResponse } from "../../../../../../backend/bindings/ErrorResponse";
 
 interface Props {
     isOpen: boolean;
     onClose: () => void;
     FetchData: () => void;
+    SetUser: (user: User | null) => void;
 }
-
-const ErrorMessage: Record<string, UseToastOptions> = {
-    "error.null": { title: "Invalid Course Name", status: "warning" },
-    "error.fk": { title: "Invalid Course Name", status: "warning" },
-    "error.server": { title: "Something went wrong", status: "error" },
-    "error.session": { title: "Your session has expired", status: "error" },
-    "error.not_found": {
-        title: "This course no longer exists",
-        status: "warning",
-    },
-};
-
-const trySubmit = async (
-    name: string
-): Promise<
-    true | "error.null" | "error.server" | "error.session" | "error.fk"
-> => {
-    if (name === "") return "error.null";
-
-    try {
-        type Data =
-            | { ok: true }
-            | {
-                  ok: false;
-                  reason: "error.null" | "error.fk" | "error.not_found";
-              };
-        const { data } = await axios.post<Data>(`/api/courses`, {
-            name,
-        });
-
-        if (data.ok === true) {
-            return true;
-        }
-        return data.reason;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            if (error.response.status === 401) {
-                return "error.session";
-            }
-        }
-        return "error.server";
-    }
-};
 
 export default function CreateCourseModal({
     isOpen,
     onClose,
     FetchData,
+    SetUser,
 }: Props) {
     const [name, setName] = useState("");
     const [loading, setLoading] = useState(false);
+    const [error, set_error] = useState<string | null>();
 
     const toast = useToast();
     const onChange = (e: ChangeEvent<HTMLInputElement>) => {
         const value = (e.target as HTMLInputElement).value;
-        if (value.length > 256) return;
+        if (value.length > 128) return;
         setName(value);
     };
 
@@ -94,16 +59,60 @@ export default function CreateCourseModal({
     };
     const Submit = async () => {
         setLoading(true);
-        const result = await trySubmit(name);
-
-        if (result === true) {
+        try {
+            const { data } = await axios.post<Course>(`/api/courses`, {
+                name,
+            });
             toast({ title: "Created Course", status: "success" });
             FetchData();
             Exit();
-        } else if (result === "error.session" || result === "error.fk") {
-            FetchData();
-        } else {
-            toast(ErrorMessage[result]);
+        } catch (e) {
+            if (
+                axios.isAxiosError<ErrorResponse>(e) &&
+                e.response !== undefined
+            ) {
+                const error = e.response.data;
+                if (error.status === 400) {
+                    if (error.fields !== null && error.fields.length > 0) {
+                        const field = error.fields[0];
+                        set_error(field.message);
+                    } else {
+                        set_error(error.message);
+                    }
+                } else if (error.status === 401) {
+                    toast({
+                        title: "Failed create course",
+                        description: error.message,
+                        status: "warning",
+                        duration: 5000,
+                    });
+                    SetUser(null);
+                } else if (error.status === 410) {
+                    toast({
+                        title: "Failed to create course",
+                        description: error.message,
+                        status: "error",
+                        duration: 5000,
+                    });
+                    SetUser(null);
+                } else if (error.status === 500) {
+                    toast({
+                        title: "Internal server error",
+                        description: error.message,
+                        status: "error",
+                        duration: 5000,
+                    });
+                    console.error(error);
+                }
+            } else {
+                toast({
+                    title: "An unexpected error ocurred",
+                    description: e,
+                    status: "error",
+                    duration: 5000,
+                });
+                console.error(e);
+            }
         }
 
         setLoading(false);
@@ -122,15 +131,20 @@ export default function CreateCourseModal({
                 <ModalHeader>Create Course</ModalHeader>
                 <ModalCloseButton isDisabled={loading} />
                 <ModalBody>
-                    <Text>Course Name</Text>
-                    <Input
-                        isDisabled={loading}
-                        value={name}
-                        onKeyDown={onKeyDown}
-                        onChange={onChange}
-                        autofocus
-                        placeholder="Enter course name"
-                    />
+                    <FormControl isInvalid={error !== null}>
+                        <FormLabel>Course Name</FormLabel>
+                        <Input
+                            isDisabled={loading}
+                            value={name}
+                            onKeyDown={onKeyDown}
+                            onChange={onChange}
+                            autofocus
+                            placeholder="Enter course name"
+                        />
+                        {error !== null ? (
+                            <FormErrorMessage>{error}</FormErrorMessage>
+                        ) : null}
+                    </FormControl>
                 </ModalBody>
 
                 <ModalFooter>

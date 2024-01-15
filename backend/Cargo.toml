@@ -34,4 +34,5 @@ tower-sessions = { version = "0.9.1", features = [
     "postgres-store",
     "deletion-task",
 ] }
+ts-rs = { version = "7.1.0", features = ["uuid", "chrono", "uuid-impl", "chrono-impl"] }
 uuid = { version = "1.6.1", features = ["serde", "v4"] }

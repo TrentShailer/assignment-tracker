@@ -85,7 +85,7 @@ impl ErrorResponse {
 
     pub fn fields(status: StatusCode, fields: Vec<FieldError>) -> Self {
         let field_names: Vec<String> = fields.iter().map(|f| f.field.to_string()).collect();
-        let message = "Invalid fields: ".to_string() + &field_names.join(", ");
+        let message = "Invalid ".to_string() + &field_names.join(", ");
 
         Self {
             status,

@@ -1,37 +1,72 @@
 import { render } from "preact";
-import { Box, ChakraProvider, useToast } from "@chakra-ui/react";
+import {
+    Box,
+    ChakraProvider,
+    CreateToastFnReturn,
+    useToast,
+} from "@chakra-ui/react";
 import theme from "./theme.js";
 import { useEffect, useState } from "preact/hooks";
 import Loading from "./components/Loading.js";
 import Home from "./components/Home.js";
 import Auth from "./components/Auth.js";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
+import { User } from "../../backend/bindings/User";
+import { is_error_response } from "./error.js";
+import { ErrorResponse } from "../../backend/bindings/ErrorResponse.js";
 
-export type User = {
-    id: string;
-    username: string;
-};
+dayjs.extend(advancedFormat);
+axios.defaults.baseURL = import.meta.env.DEV
+    ? "http://localhost:8080"
+    : undefined;
+axios.defaults.withCredentials = import.meta.env.DEV ? true : false;
 
 const transitionDuration = 250;
 
-const FetchSession = async (): Promise<User | null> => {
+const FetchSession = async (
+    toast: CreateToastFnReturn
+): Promise<User | null> => {
     try {
-        type GetUser = { ok: true; user: User };
-        const { data } = await axios.get<GetUser>("/api/user");
-
-        if (data.ok === true) {
-            return data.user;
-        }
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            if (error.response.status === 401) {
+        const { data } = await axios.get<User>("/api/user");
+        return data;
+    } catch (e: any) {
+        if (axios.isAxiosError<ErrorResponse>(e) && e.response !== undefined) {
+            const error = e.response.data;
+            if (error.status === 401) {
+                return null;
+            }
+            if (error.status === 410) {
+                toast({
+                    title: "Failed to get session",
+                    description: error.message,
+                    status: "error",
+                    duration: 5000,
+                });
+                return null;
+            }
+            if (error.status === 500) {
+                toast({
+                    title: "Internal server error",
+                    description: error.message,
+                    status: "error",
+                    duration: 5000,
+                });
+                console.error(error);
                 return null;
             }
         }
+
+        toast({
+            title: "An unexpected error ocurred",
+            description: e,
+            status: "error",
+            duration: 5000,
+        });
+        console.error(e);
+        return null;
     }
-    return null;
 };
 
 export function App() {
@@ -40,9 +75,10 @@ export function App() {
 
     const [user, setUser] = useState<User | null>(null);
 
+    const toast = useToast();
+
     useEffect(() => {
-        dayjs.extend(advancedFormat);
-        FetchSession().then((user) => {
+        FetchSession(toast).then((user) => {
             setUser(user);
             // Fade out
             setOpacity(0);

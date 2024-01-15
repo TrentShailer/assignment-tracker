@@ -6,84 +6,124 @@ import {
     Flex,
     Heading,
     Stack,
+    useToast,
 } from "@chakra-ui/react";
 import React from "preact";
 import axios from "axios";
 import Footer from "./Footer";
-import { User } from "..";
 import { useState } from "preact/hooks";
-import Username from "./Auth/Username";
-import Password from "./Auth/Password";
+import AuthInput from "./Auth/Username";
 import Submit from "./Auth/Submit";
+import Password from "./Auth/Password";
+import Username from "./Auth/Username";
+import { User } from "../../../backend/bindings/User";
+import { ErrorResponse } from "../../../backend/bindings/ErrorResponse";
 
 interface Props {
     SetUser: (user: User) => void;
 }
 
-const ErrorMessage = {
-    "error.null": "Username or password is empty.",
-    "error.bounds": "Username or password is too long.",
-    "error.unique": "Username already exists.",
-    "error.username_password": "Username or password are incorrect.",
-    "error.server": "Something went wrong.",
-};
-
 const ValidateFields = (
     username: string,
     password: string
-): true | "error.null" => {
-    if (!username || username.length === 0) {
-        return "error.null";
+): { username_error: string | null; password_error: string | null } => {
+    let username_error: string | null = null;
+    let password_error: string | null = null;
+    if (!username || username.length === 0 || username.length > 128) {
+        username_error = "Username must be between 1-128 characters.";
     }
-    if (!password || password.length === 0) {
-        return "error.null";
+    if (!password || password.length === 0 || password.length > 128) {
+        password_error = "Password must be between 1-128 characters.";
     }
-    return true;
+    return { username_error, password_error };
 };
 
 const AttemptSubmit = async (
     uri: string,
     username: string,
     password: string
-): Promise<SubmitResult> => {
+): Promise<User> => {
     try {
-        const { data } = await axios.post<SubmitResult>(uri, {
+        const { data } = await axios.post<User>(uri, {
             username,
             password,
         });
         return data;
-    } catch (error) {
-        return { ok: false, reason: "error.server" };
-    }
+    } catch (error) {}
 };
-
-type SubmitResult = { ok: true; user: User } | { ok: false; reason: string };
 
 export default function Auth({ SetUser }: Props) {
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [usernameError, setUsernameError] = useState<string | null>(null);
+
+    const toast = useToast();
 
     const trySubmit = async (type: "login" | "register") => {
         setLoading(true);
         setError(null);
-        const validFields = ValidateFields(username, password);
-        if (validFields !== true) {
+        setUsernameError(null);
+        setPasswordError(null);
+        const { username_error, password_error } = ValidateFields(
+            username,
+            password
+        );
+        if (username_error !== null || password_error !== null) {
             setLoading(false);
-            setError(ErrorMessage[validFields]);
+            setError("Username or password is invalid.");
+            setUsernameError(username_error);
+            setPasswordError(password_error);
             return;
         }
 
         const uri = type === "login" ? "/api/session" : "/api/users";
 
-        const data = await AttemptSubmit(uri, username, password);
-        if (data.ok === true) {
-            SetUser(data.user);
-        } else {
-            setLoading(false);
-            setError(ErrorMessage[data.reason]);
+        try {
+            const { data } = await axios.post<User>(uri, {
+                username,
+                password,
+            });
+            SetUser(data);
+        } catch (e) {
+            if (
+                axios.isAxiosError<ErrorResponse>(e) &&
+                e.response !== undefined
+            ) {
+                const error = e.response.data;
+                if (error.status === 400) {
+                    setError(error.message);
+                    if (error.fields !== null) {
+                        error.fields.forEach((field) => {
+                            if (field.field === "username") {
+                                setUsernameError(field.message);
+                            } else if (field.field === "password") {
+                                setPasswordError(field.message);
+                            }
+                        });
+                    }
+                } else if (error.status === 500) {
+                    toast({
+                        title: "Internal server error",
+                        description: error.message,
+                        status: "error",
+                        duration: 5000,
+                    });
+                    console.error(error);
+                }
+            } else {
+                toast({
+                    title: "An unexpected error ocurred",
+                    description: e,
+                    status: "error",
+                    duration: 5000,
+                });
+                console.error(e);
+            }
         }
+        setLoading(false);
     };
 
     return (
@@ -101,17 +141,25 @@ export default function Auth({ SetUser }: Props) {
                     <Stack gap={4}>
                         <Username
                             loading={loading}
-                            username={username}
-                            setUsername={setUsername}
+                            value={username}
+                            setValue={(v) => {
+                                setUsername(v);
+                                setUsernameError(null);
+                            }}
+                            error={usernameError}
                         />
                         <Password
                             loading={loading}
-                            password={password}
-                            setPassword={setPassword}
+                            value={password}
+                            setValue={(v) => {
+                                setPassword(v);
+                                setPasswordError(null);
+                            }}
                             trySubmit={trySubmit}
+                            error={passwordError}
                         />
                         {error ? (
-                            <Alert status="error">
+                            <Alert status={"warning"}>
                                 <AlertIcon />
                                 {error}
                             </Alert>

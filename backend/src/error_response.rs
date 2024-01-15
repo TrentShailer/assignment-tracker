@@ -2,12 +2,15 @@ use std::borrow::Cow;
 
 use axum::{http::StatusCode, response::IntoResponse};
 use serde::{Serialize, Serializer};
+use ts_rs::TS;
 
 use crate::json_extractor::Json;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, TS)]
+#[ts(export)]
 pub struct ErrorResponse {
     #[serde(serialize_with = "serialize_status_code")]
+    #[ts(type = "number")]
     status: StatusCode,
     message: Cow<'static, str>,
     fields: Option<Vec<FieldError>>,
@@ -20,7 +23,8 @@ where
     se.serialize_u16(status.as_u16())
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, TS)]
+#[ts(export)]
 pub struct FieldError {
     field: String,
     message: String,

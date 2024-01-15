@@ -1,118 +1,125 @@
 import React from "preact";
-import { User } from "..";
-import { Box, Container, useToast } from "@chakra-ui/react";
+import {
+    Box,
+    Container,
+    CreateToastFnReturn,
+    useToast,
+} from "@chakra-ui/react";
 import Footer from "./Footer";
 import Header from "./Home/Header";
 import Body from "./Home/Body";
-import dayjs, { Dayjs } from "dayjs";
 import axios from "axios";
 import { useEffect, useRef, useState } from "preact/hooks";
+import { Course } from "../../../backend/bindings/Course";
+import { Assignment as RawAssignment } from "../../../backend/bindings/Assignment";
+import { User } from "../../../backend/bindings/User";
+import { ErrorResponse } from "../../../backend/bindings/ErrorResponse";
+import dayjs, { Dayjs } from "dayjs";
+import {
+    Assignment,
+    compare_assignments,
+    parse_assignment,
+} from "../assignment";
 
 interface Props {
     SetUser: (user: User | null) => void;
     user: User;
 }
 
-export type Assignment = {
-    id: string;
-    course_id: string;
-    name: string;
-    out_date: Dayjs;
-    due_date: Dayjs;
-    progress: number;
-};
-
-type AssignmentReceived = {
-    id: string;
-    course_id: string;
-    name: string;
-    out_date: string;
-    due_date: string;
-    progress: number;
-};
-
-export type Course = {
-    id: string;
-    name: string;
-};
-
-const GetCourses = async (): Promise<
-    Course[] | "error.session" | "error.server"
-> => {
+const GetCourses = async (
+    toast: CreateToastFnReturn,
+    set_user: (user: User | null) => void
+): Promise<Course[]> => {
     try {
-        type Result = { ok: true; courses: Course[] };
-        const { data } = await axios.get<Result>("/api/courses");
-        return data.courses;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            if (error.response.status === 401) {
-                return "error.session";
+        const { data } = await axios.get<Course[]>("/api/courses");
+        return data;
+    } catch (e) {
+        if (axios.isAxiosError<ErrorResponse>(e) && e.response !== undefined) {
+            const error = e.response.data;
+            if (error.status === 401) {
+                toast({
+                    title: "Failed to get courses",
+                    description: error.message,
+                    status: "warning",
+                    duration: 5000,
+                });
+                set_user(null);
+            } else if (error.status === 410) {
+                toast({
+                    title: "Failed to get courses",
+                    description: error.message,
+                    status: "error",
+                    duration: 5000,
+                });
+                set_user(null);
+            } else if (error.status === 500) {
+                toast({
+                    title: "Internal server error",
+                    description: error.message,
+                    status: "error",
+                    duration: 5000,
+                });
+                console.error(error);
             }
+        } else {
+            toast({
+                title: "An unexpected error ocurred",
+                description: e,
+                status: "error",
+                duration: 5000,
+            });
+            console.error(e);
         }
     }
-    return "error.server";
+    return [];
 };
 
-const GetAssignments = async (): Promise<
-    Assignment[] | "error.session" | "error.server"
-> => {
+const GetAssignments = async (
+    toast: CreateToastFnReturn,
+    set_user: (user: User | null) => void
+): Promise<Assignment[]> => {
     try {
-        type Result = { ok: true; assignments: AssignmentReceived[] };
-        const { data } = await axios.get<Result>("/api/assignments");
-        return parseAssignments(data.assignments);
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            if (error.response.status === 401) {
-                return "error.session";
+        const { data } = await axios.get<RawAssignment[]>("/api/assignments");
+        return data.map(parse_assignment);
+    } catch (e) {
+        if (axios.isAxiosError<ErrorResponse>(e) && e.response !== undefined) {
+            const error = e.response.data;
+            if (error.status === 401) {
+                toast({
+                    title: "Failed to get assignments",
+                    description: error.message,
+                    status: "warning",
+                    duration: 5000,
+                });
+                set_user(null);
+            } else if (error.status === 410) {
+                toast({
+                    title: "Failed to get assignments",
+                    description: error.message,
+                    status: "error",
+                    duration: 5000,
+                });
+                set_user(null);
+            } else if (error.status === 500) {
+                toast({
+                    title: "Internal server error",
+                    description: error.message,
+                    status: "error",
+                    duration: 5000,
+                });
+                console.error(error);
             }
+        } else {
+            toast({
+                title: "An unexpected error ocurred",
+                description: e,
+                status: "error",
+                duration: 5000,
+            });
+            console.error(e);
         }
     }
-    return "error.server";
-};
-
-const parseAssignments = (assignments: AssignmentReceived[]): Assignment[] => {
-    return assignments
-        .map((assignment) => {
-            const out_date = dayjs(assignment.out_date);
-            const due_date = dayjs(assignment.due_date);
-            return { ...assignment, out_date, due_date };
-        })
-        .sort(compareAssignments);
-};
-
-const compareByOutDate = (a: Assignment, b: Assignment): number => {
-    const aDiff = Math.abs(a.out_date.diff(dayjs()));
-    const bDiff = Math.abs(b.out_date.diff(dayjs()));
-    return aDiff < bDiff ? -1 : 1;
-};
-
-const compareByDueDate = (a: Assignment, b: Assignment): number => {
-    const aDiff = Math.abs(a.due_date.diff(dayjs()));
-    const bDiff = Math.abs(b.due_date.diff(dayjs()));
-    return aDiff < bDiff ? -1 : 1;
-};
-
-const compareAssignments = (a: Assignment, b: Assignment): number => {
-    const aOut = a.out_date.isBefore(dayjs());
-    const bOut = b.out_date.isBefore(dayjs());
-    const aFinished = a.due_date.isBefore(dayjs()) || a.progress === 100;
-    const bFinished = b.due_date.isBefore(dayjs()) || b.progress === 100;
-
-    // If only one is finished, sort it last
-    if (aFinished && !bFinished) return 1;
-    if (!aFinished && bFinished) return -1;
-
-    if (aFinished && bFinished) return compareByOutDate(a, b);
-
-    // If only one is out, sort it first
-    if (aOut && !bOut) return -1;
-    if (!aOut && bOut) return 1;
-
-    // If a is out and b is out, sort the due soonest first
-    if (aOut && bOut) return compareByDueDate(a, b);
-
-    // If a is not out and b is not out, sort the out soonest first
-    return compareByOutDate(a, b);
+    return [];
 };
 
 let interval: number;
@@ -124,43 +131,25 @@ export default function Home({ user, SetUser }: Props) {
 
     const toast = useToast();
 
-    const assignmentRef = useRef(assignments);
-
-    const UpdateAssignments = () => {
-        setAssignments([...assignmentRef.current.sort(compareAssignments)]);
-    };
-
     const Focus = () => {
-        UpdateAssignments();
+        FetchData();
 
-        interval = setInterval(UpdateAssignments, 1000 * 60);
+        interval = setInterval(FetchData, 1000 * 60);
     };
     const Blur = () => {
         clearInterval(interval);
     };
 
     const FetchData = async () => {
-        setLoading(true);
+        // setLoading(true);
 
-        const courses = await GetCourses();
-        const assignments = await GetAssignments();
-
-        if (courses === "error.session" || assignments === "error.session") {
-            toast({ title: "Your session has expired", status: "warning" });
-            SetUser(null);
-            return;
-        } else if (
-            courses === "error.server" ||
-            assignments === "error.server"
-        ) {
-            toast({ title: "Something went wrong", status: "error" });
-            return;
-        }
+        const courses = await GetCourses(toast, SetUser);
+        const assignments = (await GetAssignments(toast, SetUser)).sort(
+            compare_assignments
+        );
 
         setCourses(courses);
         setAssignments(assignments);
-        assignmentRef.current = assignments;
-        UpdateAssignments();
     };
 
     useEffect(() => {

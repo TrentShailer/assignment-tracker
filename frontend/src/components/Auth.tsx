@@ -38,20 +38,6 @@ const ValidateFields = (
     return { username_error, password_error };
 };
 
-const AttemptSubmit = async (
-    uri: string,
-    username: string,
-    password: string
-): Promise<User> => {
-    try {
-        const { data } = await axios.post<User>(uri, {
-            username,
-            password,
-        });
-        return data;
-    } catch (error) {}
-};
-
 export default function Auth({ SetUser }: Props) {
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState("");

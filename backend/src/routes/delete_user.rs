@@ -39,10 +39,10 @@ pub async fn delete_user(
         return Err(ErrorResponse::DELETED_USER);
     }
 
-    if let Err(e) = session.delete().await {
+    session.delete().await.map_err(|e| {
         error!("{}", e);
-        return Err(ErrorResponse::SESSION_ERROR);
-    }
+        ErrorResponse::SESSION_ERROR
+    })?;
 
     Ok(StatusCode::OK)
 }

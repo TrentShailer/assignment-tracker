@@ -66,7 +66,7 @@ async fn create_pool() -> PgPool {
 fn configure_cors() -> CorsLayer {
     let origin_url = std::env::var("ORIGIN_URL").expect(".env must contain ORIGIN_URL");
     let origins = [
-        "http://localhost:3000".parse().unwrap(),
+        "http://localhost:5173".parse().unwrap(),
         origin_url.parse().unwrap(),
     ];
 

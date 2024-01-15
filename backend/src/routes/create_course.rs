@@ -34,6 +34,10 @@ pub async fn create_course(
     };
 
     if !user_exists(&user_id, &pool).await? {
+        session.delete().await.map_err(|e| {
+            error!("{}", e);
+            ErrorResponse::SESSION_ERROR
+        })?;
         return Err(ErrorResponse::DELETED_USER);
     }
 

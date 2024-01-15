@@ -40,7 +40,13 @@ pub async fn get_user(
 
     let user = match maybe_user {
         Some(v) => v,
-        None => return Err(ErrorResponse::DELETED_USER),
+        None => {
+            session.delete().await.map_err(|e| {
+                error!("{}", e);
+                ErrorResponse::SESSION_ERROR
+            })?;
+            return Err(ErrorResponse::DELETED_USER);
+        }
     };
 
     Ok((StatusCode::OK, Json(user)))

@@ -1,54 +1,67 @@
-import { Text, Input, Box } from "@chakra-ui/react";
+import {
+    Text,
+    Input,
+    Box,
+    FormControl,
+    FormErrorMessage,
+    FormLabel,
+} from "@chakra-ui/react";
 import dayjs, { Dayjs } from "dayjs";
 import React from "preact";
 import { ChangeEvent } from "preact/compat";
 import { StateUpdater, useEffect, useState } from "preact/hooks";
 
 interface Props {
-  label: string;
-  date: Dayjs | null;
-  setDate: StateUpdater<Dayjs>;
+    label: string;
+    date: Dayjs | null;
+    setDate: StateUpdater<Dayjs>;
+    dateError: string | null;
 }
 
-export default function Date({ label, date, setDate }: Props) {
-  const [isInvalid, setIsInvalid] = useState(date ? false : true);
-  const [value, setValue] = useState(
-    date ? date.format("YYYY-MM-DDTHH:mm") : ""
-  );
+export default function Date({ label, date, setDate, dateError }: Props) {
+    const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setValue(date ? date.format("YYYY-MM-DDTHH:mm") : "");
-    if (date) setIsInvalid(false);
-  }, [date]);
+    const [value, setValue] = useState(
+        date ? date.format("YYYY-MM-DDTHH:mm") : ""
+    );
 
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newValue = (e.target as HTMLInputElement).value;
-    setValue(newValue);
+    useEffect(() => {
+        setValue(date ? date.format("YYYY-MM-DDTHH:mm") : "");
+    }, [date]);
 
-    if (!newValue) {
-      setIsInvalid(true);
-      setDate(null);
-      return;
-    }
+    useEffect(() => {
+        setError(dateError);
+    }, [dateError]);
 
-    try {
-      const dayjsVal = dayjs(newValue);
-      setIsInvalid(false);
-      setDate(dayjsVal);
-    } catch (_) {}
-  };
+    const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+        const newValue = (e.target as HTMLInputElement).value;
+        setValue(newValue);
 
-  return (
-    <Box>
-      <Text>{label}</Text>
-      <Input
-        value={value}
-        focusBorderColor={isInvalid ? "red.500" : "blue.500"}
-        isInvalid={isInvalid}
-        onChange={onChange}
-        placeholder={`Enter ${label}`}
-        type="datetime-local"
-      />
-    </Box>
-  );
+        if (!newValue) {
+            setError(null);
+            setDate(null);
+            return;
+        }
+
+        try {
+            const dayjsVal = dayjs(newValue);
+            setError(null);
+            setDate(dayjsVal);
+        } catch (_) {}
+    };
+
+    return (
+        <FormControl isInvalid={error !== null}>
+            <FormLabel>{label}</FormLabel>
+            <Input
+                value={value}
+                onChange={onChange}
+                placeholder={`Enter ${label}`}
+                type="datetime-local"
+            />
+            {error !== null ? (
+                <FormErrorMessage>{error}</FormErrorMessage>
+            ) : null}
+        </FormControl>
+    );
 }

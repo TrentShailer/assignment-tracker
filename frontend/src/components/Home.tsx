@@ -173,6 +173,7 @@ export default function Home({ user, SetUser }: Props) {
                         FetchData={FetchData}
                         assignments={assignments}
                         courses={courses}
+                        SetUser={SetUser}
                     />
                 </Box>
                 <Footer />

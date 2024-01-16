@@ -7,14 +7,21 @@ import axios from "axios";
 import AssignmentModal from "../components/AssignmentModal";
 import { Assignment } from "../../assignment";
 import { Course } from "../../../../backend/bindings/Course";
+import { User } from "../../../../backend/bindings/User";
 
 interface Props {
     FetchData: () => void;
+    SetUser: (user: User | null) => void;
     assignments: Assignment[];
     courses: Course[];
 }
 
-export default function Body({ FetchData, assignments, courses }: Props) {
+export default function Body({
+    FetchData,
+    assignments,
+    courses,
+    SetUser,
+}: Props) {
     const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
     const [openAssignment, setOpenAssignment] = useState<Assignment>(null);
     const [openCourse, setOpenCourse] = useState<Course>(null);
@@ -56,6 +63,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
                 FetchData={FetchData}
                 assignment={openAssignment}
                 course={openCourse}
+                SetUser={SetUser}
             />
             <Stack
                 direction="row"
@@ -71,6 +79,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
                     course={{ id: "", name: "Active" }}
                     assignments={activeAssignments}
                     courses={courses}
+                    SetUser={SetUser}
                 />
                 {courses.map((course) => (
                     <Column
@@ -81,6 +90,7 @@ export default function Body({ FetchData, assignments, courses }: Props) {
                         assignments={assignments.filter(
                             (assignment) => assignment.course_id === course.id
                         )}
+                        SetUser={SetUser}
                     />
                 ))}
             </Stack>

@@ -40,7 +40,7 @@ export default function ImportCourseModal({
     const Submit = async () => {
         setLoading(true);
         try {
-            const { data } = await axios.post<void>("/api/courses/import", {
+            await axios.post("/api/courses/import", {
                 course_id: code,
             });
             toast({ title: "Imported course", status: "success" });

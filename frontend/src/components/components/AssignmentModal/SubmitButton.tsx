@@ -1,9 +1,10 @@
 import { Button, UseToastOptions, useToast } from "@chakra-ui/react";
 import { Dayjs } from "dayjs";
 import React from "preact";
-import { Assignment, Course } from "../../Home";
 import axios, { AxiosRequestConfig } from "axios";
 import { StateUpdater } from "preact/hooks";
+import { Assignment } from "../../../assignment";
+import { Course } from "../../../../../backend/bindings/Course";
 
 interface Props {
     loading: boolean;
@@ -18,18 +19,13 @@ interface Props {
     FetchData: () => void;
 }
 
-const ErrorMessage: Record<string, UseToastOptions> = {
-    "error.null": { title: "Not all fields are valid", status: "warning" },
-    "error.server": { title: "Something went wrong", status: "error" },
-};
-
 const verifyFields = (
     name: string,
     outDate: Dayjs,
     dueDate: Dayjs,
     progress: number
 ): boolean => {
-    if (name === "" || name.length > 256) return false;
+    if (name === "" || name.length > 128) return false;
     if (!outDate) return false;
     if (!dueDate) return false;
     if (progress > 100 || progress < 0) return false;

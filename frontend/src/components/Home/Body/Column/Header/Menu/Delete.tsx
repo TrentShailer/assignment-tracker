@@ -48,7 +48,7 @@ export default function Delete({
                 const error = e.response.data;
                 if (error.status === 401) {
                     toast({
-                        title: "Failed delete course",
+                        title: "Failed to delete course",
                         description: error.message,
                         status: "warning",
                         duration: 5000,
@@ -56,7 +56,7 @@ export default function Delete({
                     SetUser(null);
                 } else if (error.status === 404) {
                     toast({
-                        title: "Failed delete course",
+                        title: "Failed to delete course",
                         description: error.message,
                         status: "warning",
                         duration: 5000,

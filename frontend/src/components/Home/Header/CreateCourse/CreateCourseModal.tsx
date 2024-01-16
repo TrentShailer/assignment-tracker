@@ -81,7 +81,7 @@ export default function CreateCourseModal({
                     }
                 } else if (error.status === 401) {
                     toast({
-                        title: "Failed create course",
+                        title: "Failed to create course",
                         description: error.message,
                         status: "warning",
                         duration: 5000,

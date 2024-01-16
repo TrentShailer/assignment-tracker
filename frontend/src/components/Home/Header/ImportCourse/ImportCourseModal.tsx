@@ -52,9 +52,26 @@ export default function ImportCourseModal({
                 e.response !== undefined
             ) {
                 const error = e.response.data;
-                if (error.status === 401) {
+                if (error.status === 400) {
+                    if (error.fields !== null && error.fields.length > 0) {
+                        const field = error.fields[0];
+                        toast({
+                            title: "Failed to import course",
+                            description: field.message,
+                            status: "warning",
+                            duration: 5000,
+                        });
+                    } else {
+                        toast({
+                            title: "Failed to import course",
+                            description: error.message,
+                            status: "warning",
+                            duration: 5000,
+                        });
+                    }
+                } else if (error.status === 401) {
                     toast({
-                        title: "Failed import course",
+                        title: "Failed to import course",
                         description: error.message,
                         status: "warning",
                         duration: 5000,

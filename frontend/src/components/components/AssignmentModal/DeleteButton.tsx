@@ -44,7 +44,7 @@ export default function DeleteButton({
                 const error = e.response.data;
                 if (error.status === 401) {
                     toast({
-                        title: "Failed delete assignment",
+                        title: "Failed to delete assignment",
                         description: error.message,
                         status: "warning",
                         duration: 5000,
@@ -52,7 +52,7 @@ export default function DeleteButton({
                     SetUser(null);
                 } else if (error.status === 404) {
                     toast({
-                        title: "Failed delete assignment",
+                        title: "Failed to delete assignment",
                         description: error.message,
                         status: "warning",
                         duration: 5000,

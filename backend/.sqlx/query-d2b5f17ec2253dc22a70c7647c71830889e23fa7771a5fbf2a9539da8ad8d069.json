@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM assignments\n        WHERE id = $1 AND user_id = $2;\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d2b5f17ec2253dc22a70c7647c71830889e23fa7771a5fbf2a9539da8ad8d069"
+}

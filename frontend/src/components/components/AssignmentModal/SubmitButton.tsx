@@ -106,8 +106,8 @@ export default function SubmitButton({
                 url: `/api/courses/${course.id}/assignments/${assignment.id}`,
                 data: {
                     name,
-                    due_date: dueDate.toISOString(),
-                    out_date: outDate.toISOString(),
+                    due_date: dueDate.format("YYYY-MM-DDTHH:mm:ss"),
+                    out_date: outDate.format("YYYY-MM-DDTHH:mm:ss"),
                     progress,
                 },
             };
@@ -117,8 +117,8 @@ export default function SubmitButton({
                 url: `/api/courses/${course.id}/assignments`,
                 data: {
                     name,
-                    due_date: dueDate.toISOString(),
-                    out_date: outDate.toISOString(),
+                    due_date: dueDate.format("YYYY-MM-DDTHH:mm:ss"),
+                    out_date: outDate.format("YYYY-MM-DDTHH:mm:ss"),
                     progress,
                 },
             };
@@ -126,11 +126,11 @@ export default function SubmitButton({
 
         try {
             await axios<Assignment>(requestConf);
-            FetchData();
             toast({
                 title: `${assignment ? "Edited" : "Created"} Assignment`,
                 status: "success",
             });
+            FetchData();
             Close();
         } catch (e) {
             if (

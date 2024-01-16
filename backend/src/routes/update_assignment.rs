@@ -88,8 +88,8 @@ pub async fn update_assignment(
         WHERE id = $1 AND user_id = $2
         RETURNING id, course_id, name, due_date, out_date, progress;
         ",
-        user_id,
         assignment_id,
+        user_id,
         body.name,
         body.due_date,
         body.out_date,

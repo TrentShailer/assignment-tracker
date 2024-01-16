@@ -123,6 +123,7 @@ const GetAssignments = async (
 };
 
 let interval: number;
+let last_fetch = 0;
 
 export default function Home({ user, SetUser }: Props) {
     const [loading, setLoading] = useState(false);
@@ -132,7 +133,10 @@ export default function Home({ user, SetUser }: Props) {
     const toast = useToast();
 
     const Focus = () => {
-        FetchData();
+        let now = new Date().getTime();
+        if (now - last_fetch > 1000 * 60) {
+            FetchData();
+        }
 
         interval = setInterval(FetchData, 1000 * 60);
     };
@@ -141,6 +145,7 @@ export default function Home({ user, SetUser }: Props) {
     };
 
     const FetchData = async () => {
+        last_fetch = new Date().getTime();
         // setLoading(true);
 
         const courses = await GetCourses(toast, SetUser);

@@ -22,9 +22,13 @@ export default function Header({ user, SetUser, FetchData }: Props) {
     const [now, setNow] = useState(NowString());
 
     useEffect(() => {
-        setInterval(() => {
+        let interval = setInterval(() => {
             setNow(NowString());
         }, 1000 * 60);
+
+        return () => {
+            clearInterval(interval);
+        };
     }, []);
     return (
         <Flex

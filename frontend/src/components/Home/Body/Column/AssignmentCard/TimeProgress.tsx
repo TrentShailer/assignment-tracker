@@ -1,5 +1,5 @@
 import React from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import dayjs, { Dayjs } from "dayjs";
 import { Progress } from "@chakra-ui/react";
 import { Assignment } from "../../../../../assignment";
@@ -22,7 +22,7 @@ export default function TimeProgress({ assignment }: Props) {
     const [progress, setProgress] = useState(0);
     const [color, setColor] = useState("green");
 
-    const SetProgress = () => {
+    const SetProgress = useCallback(() => {
         const progress = CalculateProgress(
             assignment.out_date,
             assignment.due_date
@@ -34,16 +34,16 @@ export default function TimeProgress({ assignment }: Props) {
         else if (progress > 50) setColor("orange");
         else if (progress > 25) setColor("yellow");
         else setColor("green");
-    };
+    }, [assignment, assignment.out_date, assignment.due_date]);
 
     useEffect(() => {
         SetProgress();
-    }, [assignment.out_date, assignment.due_date]);
+        let interval = setInterval(SetProgress, 1000 * 60);
 
-    useEffect(() => {
-        SetProgress();
-        setInterval(SetProgress, 1000 * 60);
-    }, []);
+        return () => {
+            clearInterval(interval);
+        };
+    }, [assignment, assignment.out_date, assignment.due_date]);
 
     return <Progress colorScheme={color} hasStripe value={progress} />;
 }

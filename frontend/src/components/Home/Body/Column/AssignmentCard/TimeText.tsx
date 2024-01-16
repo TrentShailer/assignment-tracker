@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from "dayjs";
 import React from "preact";
-import { useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { Text } from "@chakra-ui/react";
 import { Assignment } from "../../../../../assignment";
 
@@ -24,7 +24,7 @@ const CalculateTimeString = (date: Dayjs): string => {
 export default function TimeText({ assignment }: Props) {
     const [timeText, setTimeText] = useState("");
 
-    const SetTimeText = () => {
+    const SetTimeText = useCallback(() => {
         const out = assignment.out_date.isBefore(dayjs());
         const completed = assignment.due_date.isBefore(dayjs());
 
@@ -32,16 +32,16 @@ export default function TimeText({ assignment }: Props) {
         else if (out)
             setTimeText(`Due in ${CalculateTimeString(assignment.due_date)}`);
         else setTimeText(`Out in ${CalculateTimeString(assignment.out_date)}`);
-    };
+    }, [assignment, assignment.out_date, assignment.due_date]);
 
     useEffect(() => {
         SetTimeText();
-    }, [assignment.out_date, assignment.due_date]);
+        let interval = setInterval(SetTimeText, 1000 * 60);
 
-    useEffect(() => {
-        SetTimeText();
-        setInterval(SetTimeText, 1000 * 60);
-    }, []);
+        return () => {
+            clearInterval(interval);
+        };
+    }, [assignment, assignment.out_date, assignment.due_date]);
 
     return <Text>{timeText}</Text>;
 }

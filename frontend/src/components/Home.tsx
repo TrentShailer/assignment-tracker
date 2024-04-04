@@ -74,9 +74,11 @@ const GetAssignments = async (
 	set_user: (user: User | null) => void
 ): Promise<Assignment[]> => {
 	try {
-		const { data } = await axios.get<RawAssignment[]>(
-			`/api/assignments?now=${dayjs().format("YYYY-MM-DD-THH:mm:ss")}`
-		);
+		const { data } = await axios.get<RawAssignment[]>("/api/assignments", {
+			params: {
+				now: dayjs().format("YYYY-MM-DD-THH:mm:ss"),
+			},
+		});
 		return data.map(parse_assignment);
 	} catch (e) {
 		if (axios.isAxiosError<ErrorResponse>(e) && e.response !== undefined) {

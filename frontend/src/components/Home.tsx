@@ -76,7 +76,7 @@ const GetAssignments = async (
 	try {
 		const { data } = await axios.get<RawAssignment[]>("/api/assignments", {
 			params: {
-				now: dayjs().format("YYYY-MM-DD-THH:mm:ss"),
+				now: dayjs().format("YYYY-MM-DDTHH:mm:ss"),
 			},
 		});
 		return data.map(parse_assignment);

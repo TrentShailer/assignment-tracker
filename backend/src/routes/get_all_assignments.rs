@@ -1,5 +1,10 @@
-use axum::{extract::State, http::StatusCode};
+use axum::{
+    extract::{Query, State},
+    http::StatusCode,
+};
+use chrono::NaiveDateTime;
 use log::error;
+use serde::Deserialize;
 use sqlx::PgPool;
 use tower_sessions::Session;
 use uuid::Uuid;
@@ -9,8 +14,14 @@ use crate::{
     SESSION_USER_ID_KEY,
 };
 
+#[derive(Deserialize)]
+pub struct QueryContents {
+    now: NaiveDateTime,
+}
+
 pub async fn get_all_assignments(
     State(pool): State<PgPool>,
+    Query(query): Query<QueryContents>,
     session: Session,
 ) -> Result<(StatusCode, Json<Vec<Assignment>>), ErrorResponse> {
     let maybe_user_id: Option<Uuid> = session.get(SESSION_USER_ID_KEY).await.map_err(|e| {
@@ -31,7 +42,7 @@ pub async fn get_all_assignments(
         return Err(ErrorResponse::DELETED_USER);
     }
 
-    let assignments = sqlx::query_as!(
+    let mut assignments = sqlx::query_as!(
         Assignment,
         "
         SELECT id, course_id, name, out_date, due_date, progress
@@ -46,6 +57,8 @@ pub async fn get_all_assignments(
         error!("{}", e);
         ErrorResponse::DATABASE_ERROR
     })?;
+
+    assignments.sort_by(|a, b| a.cmp(&query.now, b));
 
     Ok((StatusCode::OK, Json(assignments)))
 }

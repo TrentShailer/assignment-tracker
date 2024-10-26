@@ -4,4 +4,4 @@
 # cd ./live/client
 # nohup ./backups-client &>/dev/null &
 docker build . -t trentshailer/assignment-tracker:latest
-docker compose -p 'assignment-tracker' up -d
+docker compose -p 'assignment-tracker' -f ./docker/docker-compose.yml up -d

@@ -1,68 +1,17 @@
-[package]
-name = "assignment-tracker-backend"
-version = "0.2.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = ["crates/*"]
 
-build = "build.rs"
-
-[dependencies]
-# Webserver requirements
+[workspace.dependencies]
 tokio = { version = "1.35", features = ["full"] }
-axum = { version = "0.7", default-features = false, features = [
-	"json",
-	"tokio",
-	"matched-path",
-	"original-uri",
-	"macros",
-	"http1",
-	"query",
-] }
-tower = "0.5"
 
-# Used for tower ecosystem
-tower-http = { version = "0.6", features = ["cors"] }
-tower-sessions = { version = "0.13" }
-tower-sessions-sqlx-store = { version = "0.14", features = ["postgres"] }
+chrono = "0.4" # Used for dating logs and naive times
 
-# Used for content types during application and tests
-mime = "0.3"
-# Used to hash and verify hashes of passwords
-argon2 = "0.5"
-# TODO look at
-bytes = "1.5"
-
-# Additional types
-chrono = { version = "0.4", features = ["serde"] }
-uuid = { version = "1.6", features = ["serde", "v4"] }
-
-dotenvy = "0.15"
-
-# Used to manage errors and logging
-fern = { version = "0.6" }
 log = "0.4"
 thiserror = "1.0"
 
-# Used to (de)serialize objects for request, response, and database.
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-# TODO maybe remove?
-serde_path_to_error = "0.1"
+# Workspace library crates
+webserver = { path = "crates/webserver" }
 
-# Used to make database queries
-sqlx = { version = "0.8", default-features = false, features = [
-	"runtime-tokio",
-	"postgres",
-	"json",
-	"chrono",
-	"uuid",
-	"migrate",
-	"macros",
-] }
-
-[dev-dependencies]
-temp-env = "0.3"
-http-body-util = "0.1"
-
-# Generates type bindings for typescript
 [profile.release]
 strip = true

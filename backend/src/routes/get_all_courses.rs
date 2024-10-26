@@ -5,8 +5,7 @@ use tower_sessions::Session;
 use uuid::Uuid;
 
 use crate::{
-    error_response::ErrorResponse, json_extractor::Json, types::Course, utils::user_exists,
-    SESSION_USER_ID_KEY,
+    json_extractor::Json, types::Course, CommonError, ErrorResponse, User, SESSION_USER_ID_KEY,
 };
 
 pub async fn get_all_courses(
@@ -15,36 +14,40 @@ pub async fn get_all_courses(
 ) -> Result<(StatusCode, Json<Vec<Course>>), ErrorResponse> {
     let maybe_user_id: Option<Uuid> = session.get(SESSION_USER_ID_KEY).await.map_err(|e| {
         error!("{}", e);
-        ErrorResponse::SESSION_ERROR
+        CommonError::InternalSessionError.into_error_response()
     })?;
 
     let user_id = match maybe_user_id {
         Some(v) => v,
-        None => return Err(ErrorResponse::NO_SESSION),
+        None => return Err(CommonError::NoSession.into_error_response()),
     };
 
-    if !user_exists(&user_id, &pool).await? {
+    let user_exists = User::exists(user_id, &pool).await.map_err(|e| {
+        error!("{e}");
+        CommonError::InternalDatabaseError.into_error_response()
+    })?;
+
+    if !user_exists {
         session.delete().await.map_err(|e| {
             error!("{}", e);
-            ErrorResponse::SESSION_ERROR
+            CommonError::InternalSessionError.into_error_response()
         })?;
-        return Err(ErrorResponse::DELETED_USER);
+        return Err(CommonError::UserGone.into_error_response());
     }
 
-    let courses = sqlx::query_as!(
-        Course,
+    let courses: Vec<Course> = sqlx::query_as(
         "
         SELECT id, name
         FROM courses
         WHERE user_id = $1;
         ",
-        user_id
     )
+    .bind(user_id)
     .fetch_all(&pool)
     .await
     .map_err(|e| {
         error!("{}", e);
-        ErrorResponse::DATABASE_ERROR
+        CommonError::InternalDatabaseError.into_error_response()
     })?;
 
     Ok((StatusCode::OK, Json(courses)))

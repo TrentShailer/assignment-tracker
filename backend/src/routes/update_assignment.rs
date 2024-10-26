@@ -10,11 +10,9 @@ use tower_sessions::Session;
 use uuid::Uuid;
 
 use crate::{
-    error_response::{ErrorResponse, FieldError},
     json_extractor::Json,
-    types::{Assignment, Course},
-    utils::user_exists,
-    SESSION_USER_ID_KEY,
+    types::{Assignment, Course, User},
+    CommonError, ErrorResponse, FieldError, SESSION_USER_ID_KEY,
 };
 
 #[derive(Deserialize, Serialize)]
@@ -33,20 +31,25 @@ pub async fn update_assignment(
 ) -> Result<(StatusCode, Json<Assignment>), ErrorResponse> {
     let maybe_user_id: Option<Uuid> = session.get(SESSION_USER_ID_KEY).await.map_err(|e| {
         error!("{}", e);
-        ErrorResponse::SESSION_ERROR
+        CommonError::InternalSessionError.into_error_response()
     })?;
 
     let user_id = match maybe_user_id {
         Some(v) => v,
-        None => return Err(ErrorResponse::NO_SESSION),
+        None => return Err(CommonError::NoSession.into_error_response()),
     };
 
-    if !user_exists(&user_id, &pool).await? {
+    let user_exists = User::exists(user_id, &pool).await.map_err(|e| {
+        error!("{e}");
+        CommonError::InternalDatabaseError.into_error_response()
+    })?;
+
+    if !user_exists {
         session.delete().await.map_err(|e| {
             error!("{}", e);
-            ErrorResponse::SESSION_ERROR
+            CommonError::InternalSessionError.into_error_response()
         })?;
-        return Err(ErrorResponse::DELETED_USER);
+        return Err(CommonError::UserGone.into_error_response());
     }
 
     if body.name.is_empty() || body.name.len() > 128 {
@@ -59,52 +62,50 @@ pub async fn update_assignment(
         ));
     }
 
-    let maybe_course = sqlx::query_as!(
-        Course,
+    let maybe_course: Option<Course> = sqlx::query_as(
         "
         SELECT id, name
         FROM courses
         WHERE id = $1 AND user_id = $2;
         ",
-        course_id,
-        user_id
     )
+    .bind(course_id)
+    .bind(user_id)
     .fetch_optional(&pool)
     .await
     .map_err(|e| {
         error!("{}", e);
-        ErrorResponse::DATABASE_ERROR
+        CommonError::InternalDatabaseError.into_error_response()
     })?;
 
     if maybe_course.is_none() {
-        return Err(ErrorResponse::MISSING_OR_UNOWNED_COURSE);
+        return Err(CommonError::Course404.into_error_response());
     }
 
-    let maybe_assignment = sqlx::query_as!(
-        Assignment,
+    let maybe_assignment: Option<Assignment> = sqlx::query_as(
         "
         UPDATE assignments
         SET name = $3, due_date = $4, out_date = $5, progress = $6
         WHERE id = $1 AND user_id = $2
         RETURNING id, course_id, name, due_date, out_date, progress;
         ",
-        assignment_id,
-        user_id,
-        body.name,
-        body.due_date,
-        body.out_date,
-        body.progress
     )
+    .bind(assignment_id)
+    .bind(user_id)
+    .bind(body.name)
+    .bind(body.due_date)
+    .bind(body.out_date)
+    .bind(body.progress)
     .fetch_optional(&pool)
     .await
     .map_err(|e| {
         error!("{}", e);
-        ErrorResponse::DATABASE_ERROR
+        CommonError::InternalDatabaseError.into_error_response()
     })?;
 
     let assignment = match maybe_assignment {
         Some(v) => v,
-        None => return Err(ErrorResponse::MISSING_OR_UNOWNED_ASSIGNMENT),
+        None => return Err(CommonError::Assignment404.into_error_response()),
     };
 
     Ok((StatusCode::OK, Json(assignment)))

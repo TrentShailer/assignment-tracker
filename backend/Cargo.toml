@@ -5,42 +5,66 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+build = "build.rs"
+
 [dependencies]
-argon2 = "0.5.2"
-axum = "0.7.3"
-axum-macros = "0.4.1"
-bytes = "1.5.0"
-chrono = { version = "0.4.31", features = ["serde"] }
-dotenvy = "0.15.7"
-fern = { version = "0.6.2" }
-log = "0.4.20"
-mime = "0.3.17"
-owo-colors = "4.0.0"
-serde = { version = "1.0.195", features = ["derive"] }
-serde_json = "1.0.111"
-serde_path_to_error = "0.1.15"
-sqlx = { version = "0.7.3", features = [
+# Webserver requirements
+tokio = { version = "1.35", features = ["full"] }
+axum = { version = "0.7", default-features = false, features = [
+	"json",
+	"tokio",
+	"matched-path",
+	"original-uri",
+	"macros",
+	"http1",
+	"query",
+] }
+tower = "0.5"
+
+# Used for tower ecosystem
+tower-http = { version = "0.6", features = ["cors"] }
+tower-sessions = { version = "0.13" }
+tower-sessions-sqlx-store = { version = "0.14", features = ["postgres"] }
+
+# Used for content types during application and tests
+mime = "0.3"
+# Used to hash and verify hashes of passwords
+argon2 = "0.5"
+# TODO look at
+bytes = "1.5"
+
+# Additional types
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.6", features = ["serde", "v4"] }
+
+dotenvy = "0.15"
+
+# Used to manage errors and logging
+fern = { version = "0.6" }
+log = "0.4"
+thiserror = "1.0"
+
+# Used to (de)serialize objects for request, response, and database.
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# TODO maybe remove?
+serde_path_to_error = "0.1"
+
+# Used to make database queries
+sqlx = { version = "0.8", default-features = false, features = [
 	"runtime-tokio",
 	"postgres",
+	"json",
+	"chrono",
+	"uuid",
+	"migrate",
 	"macros",
-	"chrono",
-	"uuid",
 ] }
-thiserror = "1.0.56"
-tokio = { version = "1.35.1", features = ["full"] }
-tower = "0.4.13"
-tower-http = { version = "0.5.0", features = ["cors"] }
-tower-sessions = { version = "0.9.1", features = [
-	"postgres-store",
-	"deletion-task",
-] }
-ts-rs = { version = "7.1.0", features = [
-	"uuid",
-	"chrono",
-	"uuid-impl",
-	"chrono-impl",
-] }
-uuid = { version = "1.6.1", features = ["serde", "v4"] }
 
+[dev-dependencies]
+temp-env = "0.3"
+http-body-util = "0.1"
+
+# Generates type bindings for typescript
 [profile.release]
 strip = true

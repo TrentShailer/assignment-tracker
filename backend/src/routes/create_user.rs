@@ -10,10 +10,7 @@ use thiserror::Error;
 use tower_sessions::Session;
 
 use crate::{
-    error_response::{ErrorResponse, FieldError},
-    json_extractor::Json,
-    types::User,
-    SESSION_USER_ID_KEY,
+    json_extractor::Json, types::User, CommonError, ErrorResponse, FieldError, SESSION_USER_ID_KEY,
 };
 
 #[derive(Deserialize, Serialize)]
@@ -32,19 +29,18 @@ pub async fn create_user(
 
     let hash = hash_password(body.password).map_err(|e| {
         error!("{}", e);
-        ErrorResponse::HASH_ERROR
+        CommonError::InternalHashError.into_error_response()
     })?;
 
-    let user = sqlx::query_as!(
-        User,
+    let user: User = sqlx::query_as(
         "
         INSERT INTO users (username, password)
         VALUES ($1, $2)
         RETURNING id, username;
         ",
-        &body.username,
-        hash
     )
+    .bind(&body.username)
+    .bind(hash)
     .fetch_one(&pool)
     .await
     .map_err(|e| {
@@ -55,13 +51,13 @@ pub async fn create_user(
             )
         } else {
             error!("{}", e);
-            ErrorResponse::DATABASE_ERROR
+            CommonError::InternalDatabaseError.into_error_response()
         }
     })?;
 
     if let Err(e) = session.insert(SESSION_USER_ID_KEY, user.id).await {
         error!("{}", e);
-        return Err(ErrorResponse::SESSION_ERROR);
+        return Err(CommonError::InternalSessionError.into_error_response());
     }
 
     Ok((StatusCode::CREATED, Json(user)))
@@ -76,7 +72,6 @@ fn is_unique_violation(error: &sqlx::Error) -> bool {
     false
 }
 
-// Should take ownership so password can't be used after it is hashed
 fn hash_password(password: String) -> Result<String, argon2::password_hash::Error> {
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();

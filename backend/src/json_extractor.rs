@@ -10,7 +10,7 @@ use bytes::{BufMut, Bytes, BytesMut};
 use log::error;
 use serde::{de::DeserializeOwned, Serialize};
 
-use crate::error_response::{ErrorResponse, FieldError};
+use crate::types::{ErrorResponse, FieldError};
 
 #[derive(Debug, Clone, Copy, Default)]
 #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
@@ -93,7 +93,7 @@ where
                         // So because api will come from website, handling "." nicely for the user is not neccecary
                         let path = err.path().to_string();
                         if path == "." {
-                            ErrorResponse::basic(StatusCode::UNPROCESSABLE_ENTITY, &err.to_string())
+                            ErrorResponse::basic(StatusCode::UNPROCESSABLE_ENTITY, err.to_string())
                         } else {
                             let full_message = err.inner().to_string();
 

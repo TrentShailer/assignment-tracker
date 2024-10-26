@@ -1,5 +1,5 @@
 import dayjs, { Dayjs } from "dayjs";
-import { Assignment as RawAssignment } from "../../backend/bindings/Assignment";
+import { Assignment as RawAssignment } from "./types/Assignment";
 
 type Assignment = {
 	id: string;

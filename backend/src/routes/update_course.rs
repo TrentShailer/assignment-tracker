@@ -9,11 +9,9 @@ use tower_sessions::Session;
 use uuid::Uuid;
 
 use crate::{
-    error_response::{ErrorResponse, FieldError},
     json_extractor::Json,
-    types::Course,
-    utils::user_exists,
-    SESSION_USER_ID_KEY,
+    types::{Course, User},
+    CommonError, ErrorResponse, FieldError, SESSION_USER_ID_KEY,
 };
 
 #[derive(Deserialize, Serialize)]
@@ -29,20 +27,25 @@ pub async fn update_course(
 ) -> Result<(StatusCode, Json<Course>), ErrorResponse> {
     let maybe_user_id: Option<Uuid> = session.get(SESSION_USER_ID_KEY).await.map_err(|e| {
         error!("{}", e);
-        ErrorResponse::SESSION_ERROR
+        CommonError::InternalSessionError.into_error_response()
     })?;
 
     let user_id = match maybe_user_id {
         Some(v) => v,
-        None => return Err(ErrorResponse::NO_SESSION),
+        None => return Err(CommonError::NoSession.into_error_response()),
     };
 
-    if !user_exists(&user_id, &pool).await? {
+    let user_exists = User::exists(user_id, &pool).await.map_err(|e| {
+        error!("{e}");
+        CommonError::InternalDatabaseError.into_error_response()
+    })?;
+
+    if !user_exists {
         session.delete().await.map_err(|e| {
             error!("{}", e);
-            ErrorResponse::SESSION_ERROR
+            CommonError::InternalSessionError.into_error_response()
         })?;
-        return Err(ErrorResponse::DELETED_USER);
+        return Err(CommonError::UserGone.into_error_response());
     }
 
     if body.name.is_empty() || body.name.len() > 128 {
@@ -55,28 +58,27 @@ pub async fn update_course(
         ));
     }
 
-    let maybe_course = sqlx::query_as!(
-        Course,
+    let maybe_course: Option<Course> = sqlx::query_as(
         "
         UPDATE courses
         SET name = $3
         WHERE id = $1 AND user_id = $2
         RETURNING id, name;
         ",
-        course_id,
-        user_id,
-        body.name
     )
+    .bind(course_id)
+    .bind(user_id)
+    .bind(body.name)
     .fetch_optional(&pool)
     .await
     .map_err(|e| {
         error!("{}", e);
-        ErrorResponse::DATABASE_ERROR
+        CommonError::InternalDatabaseError.into_error_response()
     })?;
 
     let course = match maybe_course {
         Some(v) => v,
-        None => return Err(ErrorResponse::MISSING_OR_UNOWNED_COURSE),
+        None => return Err(CommonError::Course404.into_error_response()),
     };
 
     Ok((StatusCode::OK, Json(course)))

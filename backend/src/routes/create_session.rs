@@ -2,13 +2,11 @@ use argon2::{password_hash, Argon2, PasswordHash, PasswordVerifier};
 use axum::{extract::State, http::StatusCode};
 use log::error;
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{prelude::FromRow, PgPool};
 use tower_sessions::Session;
 use uuid::Uuid;
 
-use crate::{
-    error_response::ErrorResponse, json_extractor::Json, types::User, SESSION_USER_ID_KEY,
-};
+use crate::{json_extractor::Json, types::User, CommonError, ErrorResponse, SESSION_USER_ID_KEY};
 
 #[derive(Deserialize, Serialize)]
 pub struct Body {
@@ -16,6 +14,7 @@ pub struct Body {
     pub password: String,
 }
 
+#[derive(Deserialize, FromRow)]
 struct FullUser {
     pub id: Uuid,
     pub username: String,
@@ -27,20 +26,19 @@ pub async fn create_session(
     session: Session,
     Json(body): Json<Body>,
 ) -> Result<(StatusCode, Json<User>), ErrorResponse> {
-    let maybe_user = sqlx::query_as!(
-        FullUser,
+    let maybe_user: Option<FullUser> = sqlx::query_as(
         "
         SELECT id, username, password
         FROM users
         WHERE username = $1;
         ",
-        body.username
     )
+    .bind(body.username)
     .fetch_optional(&pool)
     .await
     .map_err(|e| {
         error!("{}", e);
-        ErrorResponse::DATABASE_ERROR
+        CommonError::InternalDatabaseError.into_error_response()
     })?;
 
     let user = match maybe_user {
@@ -55,7 +53,7 @@ pub async fn create_session(
 
     let parsed_hash = PasswordHash::new(&user.password).map_err(|e| {
         error!("{}", e);
-        ErrorResponse::HASH_ERROR
+        CommonError::InternalHashError.into_error_response()
     })?;
 
     let result = Argon2::default().verify_password(body.password.as_bytes(), &parsed_hash);
@@ -68,7 +66,7 @@ pub async fn create_session(
             ));
         }
         error!("{}", e);
-        return Err(ErrorResponse::HASH_ERROR);
+        return Err(CommonError::InternalHashError.into_error_response());
     }
 
     session
@@ -76,7 +74,7 @@ pub async fn create_session(
         .await
         .map_err(|e| {
             error!("{}", e);
-            ErrorResponse::SESSION_ERROR
+            CommonError::InternalSessionError.into_error_response()
         })?;
 
     Ok((

@@ -4,9 +4,7 @@ use sqlx::PgPool;
 use tower_sessions::Session;
 use uuid::Uuid;
 
-use crate::{
-    error_response::ErrorResponse, json_extractor::Json, types::User, SESSION_USER_ID_KEY,
-};
+use crate::{json_extractor::Json, types::User, CommonError, ErrorResponse, SESSION_USER_ID_KEY};
 
 pub async fn get_user(
     State(pool): State<PgPool>,
@@ -14,28 +12,27 @@ pub async fn get_user(
 ) -> Result<(StatusCode, Json<User>), ErrorResponse> {
     let maybe_user_id: Option<Uuid> = session.get(SESSION_USER_ID_KEY).await.map_err(|e| {
         error!("{}", e);
-        ErrorResponse::SESSION_ERROR
+        CommonError::InternalSessionError.into_error_response()
     })?;
 
     let user_id = match maybe_user_id {
         Some(v) => v,
-        None => return Err(ErrorResponse::NO_SESSION),
+        None => return Err(CommonError::NoSession.into_error_response()),
     };
 
-    let maybe_user = sqlx::query_as!(
-        User,
+    let maybe_user: Option<User> = sqlx::query_as(
         "
         SELECT id, username
         FROM users
         WHERE id = $1;
         ",
-        user_id
     )
+    .bind(user_id)
     .fetch_optional(&pool)
     .await
     .map_err(|e| {
         error!("{}", e);
-        ErrorResponse::DATABASE_ERROR
+        CommonError::InternalDatabaseError.into_error_response()
     })?;
 
     let user = match maybe_user {
@@ -43,9 +40,9 @@ pub async fn get_user(
         None => {
             session.delete().await.map_err(|e| {
                 error!("{}", e);
-                ErrorResponse::SESSION_ERROR
+                CommonError::InternalSessionError.into_error_response()
             })?;
-            return Err(ErrorResponse::DELETED_USER);
+            return Err(CommonError::UserGone.into_error_response());
         }
     };
 

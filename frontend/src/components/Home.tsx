@@ -5,10 +5,10 @@ import Header from "./Home/Header";
 import Body from "./Home/Body";
 import axios from "axios";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { Course } from "../../../backend/bindings/Course";
-import { Assignment as RawAssignment } from "../../../backend/bindings/Assignment";
-import { User } from "../../../backend/bindings/User";
-import { ErrorResponse } from "../../../backend/bindings/ErrorResponse";
+import { Course } from "../types/Course";
+import { Assignment as RawAssignment } from "../types/Assignment";
+import { User } from "../types/User";
+import { ErrorResponse } from "../types/ErrorResponse";
 import dayjs, { Dayjs } from "dayjs";
 import {
 	Assignment,

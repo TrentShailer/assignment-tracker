@@ -1,11 +1,18 @@
 use axum::{
+    body::Body,
+    http::Request,
     routing::{delete, get, post, put},
     Router,
 };
 use sqlx::PgPool;
-use tower_http::cors::CorsLayer;
+use tower_http::{
+    cors::CorsLayer,
+    trace::{DefaultOnResponse, TraceLayer},
+};
 use tower_sessions::SessionManagerLayer;
 use tower_sessions_sqlx_store::PostgresStore;
+use tracing::Level;
+use uuid::Uuid;
 
 use crate::routes::{
     create_assignment, create_course, create_session, create_user, delete_assignment,
@@ -55,6 +62,18 @@ impl Webserver {
             // middleware
             .layer(cors)
             .layer(session_layer)
+            .layer(
+                TraceLayer::new_for_http()
+                    .make_span_with(|request: &Request<Body>| {
+                        tracing::error_span!(
+                            "request",
+                            id = tracing::field::display(Uuid::new_v4()),
+                            method = tracing::field::display(request.method()),
+                            uri = tracing::field::display(request.uri()),
+                        )
+                    })
+                    .on_response(DefaultOnResponse::new().level(Level::INFO)),
+            )
             .with_state(database)
     }
 }

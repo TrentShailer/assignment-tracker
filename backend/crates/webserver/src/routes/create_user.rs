@@ -3,11 +3,11 @@ use argon2::{
     Argon2, PasswordHasher,
 };
 use axum::{extract::State, http::StatusCode};
-use log::error;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use thiserror::Error;
 use tower_sessions::Session;
+use tracing::error;
 
 use crate::{
     json_extractor::Json, CommonError, ErrorResponse, FieldError, User, SESSION_USER_ID_KEY,
@@ -28,7 +28,7 @@ pub async fn create_user(
         .map_err(|e| ValidationError::into_error_response(StatusCode::BAD_REQUEST, e))?;
 
     let hash = hash_password(body.password).map_err(|e| {
-        error!("{}", e);
+        error!("Failed to hash password:\n{e}");
         CommonError::InternalHashError.into_error_response()
     })?;
 
@@ -50,15 +50,14 @@ pub async fn create_user(
                 vec![FieldError::new("username", "That username is taken.")],
             )
         } else {
-            error!("{}", e);
             CommonError::InternalDatabaseError.into_error_response()
         }
     })?;
 
-    if let Err(e) = session.insert(SESSION_USER_ID_KEY, user.id).await {
-        error!("{}", e);
-        return Err(CommonError::InternalSessionError.into_error_response());
-    }
+    session
+        .insert(SESSION_USER_ID_KEY, user.id)
+        .await
+        .map_err(|_| CommonError::InternalSessionError.into_error_response())?;
 
     Ok((StatusCode::CREATED, Json(user)))
 }

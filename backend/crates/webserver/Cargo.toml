@@ -7,7 +7,7 @@ build = "build.rs"
 
 [dependencies]
 thiserror = { workspace = true }
-log = { workspace = true }
+tracing = { workspace = true }
 
 argon2 = "0.5" # Password hashing
 
@@ -31,8 +31,8 @@ sqlx = { version = "0.8", default-features = false, features = [
 chrono = { workspace = true, features = ["serde"] }
 uuid = { version = "1.6", features = ["serde", "v4"] }
 
-# Tower ecosystem: (cors, session management)
-tower-http = { version = "0.6", features = ["cors"] }
+# Tower ecosystem: (cors, trace, session management)
+tower-http = { version = "0.6", features = ["cors", "trace"] }
 tower-sessions = { version = "0.13" }
 tower-sessions-sqlx-store = { version = "0.14", features = ["postgres"] }
 

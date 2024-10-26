@@ -4,11 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-fern = { version = "0.7" }
 dotenvy = "0.15"
 
 tokio = { workspace = true }
-log = { workspace = true }
 chrono = { workspace = true }
+
+tracing = { workspace = true }
+tracing-subscriber = "0.3"
+tracing-appender = "0.2"
 
 webserver = { workspace = true }

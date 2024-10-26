@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_PORT: 5432
     volumes:
-      - ../migrations/1_tables.sql:/docker-entrypoint-initdb.d/init.sql
+      - ${PWD}/crates/webserver/migrations/1_tables.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 5432:5432
     restart: unless-stopped

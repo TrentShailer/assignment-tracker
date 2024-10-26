@@ -6,10 +6,10 @@ mod session;
 use std::net::SocketAddr;
 
 use axum::{http::header::InvalidHeaderValue, Router};
-use log::info;
 use sqlx::PgPool;
 use thiserror::Error;
 use tokio::{io, net::TcpListener};
+use tracing::info;
 
 use crate::config::Config;
 

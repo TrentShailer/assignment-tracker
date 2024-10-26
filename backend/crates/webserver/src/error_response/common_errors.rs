@@ -34,7 +34,7 @@ impl From<CommonError> for ErrorResponse {
         match value {
             CommonError::InternalDatabaseError => ErrorResponse::basic(
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Error ocurred when talking to database.",
+                "Error ocurred when accessing the database.",
             ),
 
             CommonError::InternalSessionError => ErrorResponse::basic(

@@ -7,7 +7,7 @@ tokio = { version = "1.35", features = ["full"] }
 
 chrono = "0.4" # Used for dating logs and naive times
 
-log = "0.4"
+tracing = "0.1"
 thiserror = "1.0"
 
 # Workspace library crates

@@ -45,19 +45,17 @@ impl ErrorResponse {
 impl From<JsonRejection> for ErrorResponse {
     fn from(value: JsonRejection) -> Self {
         match value {
-            JsonRejection::JsonDataError(_json_data_error) => Self::basic(
-                StatusCode::BAD_REQUEST,
-                "Failed to parse the request body as JSON",
-            ),
+            JsonRejection::JsonDataError(json_data_error) => {
+                Self::basic(StatusCode::BAD_REQUEST, json_data_error.body_text())
+            }
 
-            JsonRejection::JsonSyntaxError(_json_syntax_error) => Self::basic(
-                StatusCode::BAD_REQUEST,
-                "Failed to parse the request body as JSON",
-            ),
+            JsonRejection::JsonSyntaxError(json_syntax_error) => {
+                Self::basic(StatusCode::BAD_REQUEST, json_syntax_error.body_text())
+            }
 
-            JsonRejection::MissingJsonContentType(_missing_json_content_type) => Self::basic(
+            JsonRejection::MissingJsonContentType(missing_json_content_type) => Self::basic(
                 StatusCode::UNSUPPORTED_MEDIA_TYPE,
-                "Expected request with `Content-Type: application/json`",
+                missing_json_content_type.body_text(),
             ),
 
             JsonRejection::BytesRejection(_bytes_rejection) => Self::basic(

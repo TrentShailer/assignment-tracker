@@ -16,8 +16,6 @@ impl Webserver {
             config.origin_url.as_str().parse()?,
         ];
 
-        dbg!(&origins);
-
         let cors = CorsLayer::new()
             .allow_origin(origins)
             .allow_headers([

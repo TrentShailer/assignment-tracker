@@ -1,5 +1,4 @@
 use axum::{extract::State, http::StatusCode};
-use log::error;
 use sqlx::PgPool;
 use tower_sessions::Session;
 use uuid::Uuid;
@@ -10,10 +9,10 @@ pub async fn get_user(
     State(pool): State<PgPool>,
     session: Session,
 ) -> Result<(StatusCode, Json<User>), ErrorResponse> {
-    let maybe_user_id: Option<Uuid> = session.get(SESSION_USER_ID_KEY).await.map_err(|e| {
-        error!("{}", e);
-        CommonError::InternalSessionError.into_error_response()
-    })?;
+    let maybe_user_id: Option<Uuid> = session
+        .get(SESSION_USER_ID_KEY)
+        .await
+        .map_err(|_| CommonError::InternalSessionError.into_error_response())?;
 
     let user_id = match maybe_user_id {
         Some(v) => v,
@@ -30,18 +29,15 @@ pub async fn get_user(
     .bind(user_id)
     .fetch_optional(&pool)
     .await
-    .map_err(|e| {
-        error!("{}", e);
-        CommonError::InternalDatabaseError.into_error_response()
-    })?;
+    .map_err(|_| CommonError::InternalDatabaseError.into_error_response())?;
 
     let user = match maybe_user {
         Some(v) => v,
         None => {
-            session.delete().await.map_err(|e| {
-                error!("{}", e);
-                CommonError::InternalSessionError.into_error_response()
-            })?;
+            session
+                .delete()
+                .await
+                .map_err(|_e| CommonError::InternalSessionError.into_error_response())?;
             return Err(CommonError::UserGone.into_error_response());
         }
     };

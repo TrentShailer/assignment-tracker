@@ -1,8 +1,13 @@
-use log::{error, warn};
+mod logger;
+
+use logger::init_tracing;
+use tracing::{error, warn};
 use webserver::{Config, Webserver};
 
 #[tokio::main]
 async fn main() {
+    let _log_guards = init_tracing().expect("Failed to initialise tracing");
+
     // Try to load a .env file if it exists, a warning is emitted if it doesn't as environment
     // variables may be populated from OS environment.
     match dotenvy::dotenv() {

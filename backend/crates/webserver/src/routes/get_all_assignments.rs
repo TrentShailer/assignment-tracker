@@ -3,7 +3,6 @@ use axum::{
     http::StatusCode,
 };
 use chrono::NaiveDateTime;
-use log::error;
 use serde::Deserialize;
 use sqlx::PgPool;
 use tower_sessions::Session;
@@ -23,26 +22,25 @@ pub async fn get_all_assignments(
     Query(query): Query<QueryContents>,
     session: Session,
 ) -> Result<(StatusCode, Json<Vec<Assignment>>), ErrorResponse> {
-    let maybe_user_id: Option<Uuid> = session.get(SESSION_USER_ID_KEY).await.map_err(|e| {
-        error!("{}", e);
-        CommonError::InternalSessionError.into_error_response()
-    })?;
+    let maybe_user_id: Option<Uuid> = session
+        .get(SESSION_USER_ID_KEY)
+        .await
+        .map_err(|_| CommonError::InternalSessionError.into_error_response())?;
 
     let user_id = match maybe_user_id {
         Some(v) => v,
         None => return Err(CommonError::NoSession.into_error_response()),
     };
 
-    let user_exists = User::exists(user_id, &pool).await.map_err(|e| {
-        error!("{e}");
-        CommonError::InternalDatabaseError.into_error_response()
-    })?;
+    let user_exists = User::exists(user_id, &pool)
+        .await
+        .map_err(|_| CommonError::InternalDatabaseError.into_error_response())?;
 
     if !user_exists {
-        session.delete().await.map_err(|e| {
-            error!("{}", e);
-            CommonError::InternalSessionError.into_error_response()
-        })?;
+        session
+            .delete()
+            .await
+            .map_err(|_| CommonError::InternalSessionError.into_error_response())?;
         return Err(CommonError::UserGone.into_error_response());
     }
 
@@ -56,10 +54,7 @@ pub async fn get_all_assignments(
     .bind(user_id)
     .fetch_all(&pool)
     .await
-    .map_err(|e| {
-        error!("{}", e);
-        CommonError::InternalDatabaseError.into_error_response()
-    })?;
+    .map_err(|_| CommonError::InternalDatabaseError.into_error_response())?;
 
     assignments.sort_by(|a, b| a.cmp(&query.now, b));
 
